@@ -2,7 +2,6 @@
     import './app.css';
     import Navbar from '$lib/components/Navbar.svelte';
     import Footer from '$lib/components/Footer.svelte';
-    import { themeStore } from '$lib/stores/theme.svelte.js';
 
     const { children } = $props();
 </script>
