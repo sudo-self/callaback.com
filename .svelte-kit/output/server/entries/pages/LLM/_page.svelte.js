@@ -13,19 +13,19 @@ function _page($$renderer, $$props) {
         clearInterval(typingInterval);
       }
     }
-    $$renderer2.push(`<section${attr_class("chat-page svelte-cwls5q", void 0, {
+    $$renderer2.push(`<section${attr_class("chat-page svelte-o39feg", void 0, {
       "dark": store_get($$store_subs ??= {}, "$theme", theme) === "dark"
-    })}><header class="chat-header svelte-cwls5q"><h1 class="svelte-cwls5q"><span class="brand-gradient svelte-cwls5q">callaback</span><span class="domain svelte-cwls5q">.ai</span></h1> <p class="subtitle svelte-cwls5q">Talk to the Callaback assistant</p></header> <div class="chat-shell svelte-cwls5q"><div class="chat-messages svelte-cwls5q"><!--[-->`);
+    })}><header class="chat-header svelte-o39feg"><h1 class="svelte-o39feg"><span class="brand-gradient svelte-o39feg">ai.callaback</span></h1> <p class="subtitle svelte-o39feg">Talk to the Callaback assistant</p></header> <div class="chat-shell svelte-o39feg"><div class="chat-messages svelte-o39feg"><!--[-->`);
     const each_array = ensure_array_like(messages);
     for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
       let msg = each_array[$$index];
-      $$renderer2.push(`<div${attr_class(`message ${stringify(msg.role)}`, "svelte-cwls5q")}>${escape_html(msg.content)}</div>`);
+      $$renderer2.push(`<div${attr_class(`message ${stringify(msg.role)}`, "svelte-o39feg")}>${escape_html(msg.content)}</div>`);
     }
     $$renderer2.push(`<!--]--> `);
     {
       $$renderer2.push("<!--[!-->");
     }
-    $$renderer2.push(`<!--]--> <div></div></div> <form class="chat-input svelte-cwls5q"><input placeholder="Ask something…"${attr("value", input)}${attr("disabled", loading, true)} autocomplete="off" class="input-field svelte-cwls5q"/> <button${attr("disabled", !input.trim(), true)} class="svelte-cwls5q">Send</button></form></div></section>`);
+    $$renderer2.push(`<!--]--> <div></div></div> <form class="chat-input svelte-o39feg"><input placeholder="Ask something…"${attr("value", input)}${attr("disabled", loading, true)} autocomplete="off" class="svelte-o39feg"/> <button${attr("disabled", !input.trim(), true)} class="svelte-o39feg">Send</button></form></div></section>`);
     if ($$store_subs) unsubscribe_stores($$store_subs);
   });
 }

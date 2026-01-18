@@ -15,7 +15,7 @@
   // Initial message
   onMount(() => {
     messages = [
-      { role: 'assistant', content: 'Hi 👋 I’m callaback AI. Ask me anything.' }
+      { role: 'assistant', content: '📞 Hi! I’m callaback AI. Ask me anything.' }
     ];
 
     // Set page theme class
@@ -50,22 +50,21 @@
     messages = [...messages, { role: 'user', content: userMessage }];
 
     try {
-      const res = await fetch('https://ai.callaback1900.workers.dev', {
+      const res = await fetch('https://llm.callaback1900.workers.dev', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
       });
 
-      if (!res.ok) throw new Error('Worker error');
+      if (!res.ok) throw new Error('Worker error: ' + res.status);
 
       const data = await res.json();
 
-      const reply = Array.isArray(data) && data[0]?.response?.response
-        ? data[0].response.response
-        : 'No response from AI.';
+      const reply = data?.response?.response || 'No response from AI.';
 
       messages = [...messages, { role: 'assistant', content: reply }];
-    } catch {
+    } catch (err) {
+      console.error('AI fetch error:', err);
       messages = [...messages, {
         role: 'assistant',
         content: '⚠️ Something went wrong talking to the AI.'
@@ -78,10 +77,7 @@
 
 <section class="chat-page" class:dark={$theme === 'dark'}>
   <header class="chat-header">
-    <h1>
-      <span class="brand-gradient">callaback</span
-      ><span class="domain">.ai</span>
-    </h1>
+    <h1><span class="brand-gradient">ai.callaback</span></h1>
     <p class="subtitle">Talk to the Callaback assistant</p>
   </header>
 
@@ -111,7 +107,6 @@
         bind:value={input}
         disabled={loading}
         autocomplete="off"
-        class="input-field"
       />
       <button disabled={loading || !input.trim()}>Send</button>
     </form>
@@ -120,9 +115,9 @@
 
 <style>
   .chat-page {
-    max-width: 840px;
+    max-width: 900px;
     margin: 6rem auto 8rem;
-    padding: 0 2rem;
+    padding: 1rem 2rem;
     color: #111827;
     transition: color 0.3s, background 0.3s;
   }
@@ -147,9 +142,6 @@
     background-clip: text;
     color: transparent;
   }
-  .domain {
-    color: #6b7280;
-  }
   .subtitle {
     margin-top: 0.75rem;
     font-size: 1rem;
@@ -161,9 +153,10 @@
 
   .chat-shell {
     border: 1px solid #e5e7eb;
-    border-radius: 1.25rem;
+    border-radius: 1.5rem;
     background: white;
     overflow: hidden;
+    padding: 1rem;
     transition: background 0.3s, border-color 0.3s;
   }
   .chat-page.dark .chat-shell {
@@ -176,15 +169,15 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    max-height: 420px;
+    max-height: 500px;
     overflow-y: auto;
   }
   .message {
-    max-width: 75%;
-    padding: 0.75rem 1rem;
+    max-width: 80%;
+    padding: 0.9rem 1.2rem;
     border-radius: 1rem;
     line-height: 1.45;
-    font-size: 0.95rem;
+    font-size: 1rem;
     white-space: pre-wrap;
     transition: background 0.3s, color 0.3s;
   }
@@ -223,10 +216,10 @@
   }
   .chat-input input {
     flex: 1;
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1.2rem;
     border-radius: 999px;
     border: 1px solid #d1d5db;
-    font-size: 0.95rem;
+    font-size: 1rem;
     outline: none;
     transition: background 0.3s, border-color 0.3s, color 0.3s;
     background: white;

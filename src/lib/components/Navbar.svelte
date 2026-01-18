@@ -97,9 +97,9 @@
       <ul class="flex items-center space-x-6">
         <li>
           <a
-            href="/about"
-            class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/about' ? 'bg-white/20 text-white' : ''}"
-            aria-current={$page.url?.pathname === '/about' ? 'page' : undefined}
+            href="/LLM"
+            class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/LLM' ? 'bg-white/20 text-white' : ''}"
+            aria-current={$page.url?.pathname === '/LLM' ? 'page' : undefined}
           >
             LLM
           </a>
@@ -110,7 +110,7 @@
             class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/todo' ? 'bg-white/20 text-white' : ''}"
             aria-current={$page.url?.pathname === '/todo' ? 'page' : undefined}
           >
-            Todo
+            TODOs
           </a>
         </li>
       </ul>

@@ -144,10 +144,10 @@
       "_app/immutable/assets/_page.CzWwKSCF.css"
     ]
   },
-  "src/routes/about/+page.svelte": {
-    "file": "entries/pages/about/_page.svelte.js",
-    "name": "entries/pages/about/_page.svelte",
-    "src": "src/routes/about/+page.svelte",
+  "src/routes/LLM/+page.svelte": {
+    "file": "entries/pages/LLM/_page.svelte.js",
+    "name": "entries/pages/LLM/_page.svelte",
+    "src": "src/routes/LLM/+page.svelte",
     "isEntry": true,
     "imports": [
       "_index.js",
@@ -155,7 +155,7 @@
       "_context.js"
     ],
     "css": [
-      "_app/immutable/assets/_page.BOmTlWp9.css"
+      "_app/immutable/assets/_page.CJaOFuRv.css"
     ]
   },
   "src/routes/api/todos/+server.js": {

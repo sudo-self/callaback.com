@@ -1,6 +1,6 @@
 {
 	"/": [],
-	"/about": [],
+	"/LLM": [],
 	"/api/todos": [
 		"src/routes/api/todos/+server.js"
 	],
