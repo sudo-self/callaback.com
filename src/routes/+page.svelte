@@ -17,21 +17,17 @@
     isAnimating = true
     clickCount++
     
-    // Trigger animation reset
     isVisible = false
     await tick()
     
-    // Fire confetti
     isVisible = true
     
-    // Reset animation state after confetti completes
     setTimeout(() => {
       isVisible = false
       isAnimating = false
     }, 3000)
   }
 
-  // Handle click counter animation
   let showCounter = false
   $: if (clickCount > 0) {
     showCounter = true
@@ -48,7 +44,7 @@
         aria-label="Click for confetti celebration"
       >
         <span class="brand-gradient">callaback</span>
-        <span class="domain">.com</span>
+        <span class="domain text-gray-700 dark:text-gray-300">.com</span>
         {#if showCounter}
           <span
             class="click-counter"
@@ -60,7 +56,7 @@
         {/if}
       </h1>
       
-      <div class="subtitle">
+      <div class="subtitle text-gray-500 dark:text-gray-400">
         <svg class="sparkle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
           <path d="M12 2L14.5 8.5L21 12L14.5 15.5L12 22L9.5 15.5L3 12L9.5 8.5L12 2Z"
                 fill="currentColor" stroke="currentColor" stroke-width="1"/>
@@ -90,13 +86,13 @@
     {/if}
 
     <div class="content-grid">
-      <p class="lead" transition:fade={{ delay: 200 }}>
+      <p class="lead text-gray-900 dark:text-gray-100" transition:fade={{ delay: 200 }}>
         Everything you need to build, integrate, and scale with Callaback.
       </p>
 
-      <div class="feature-highlight" transition:fade={{ delay: 400 }}>
+      <div class="feature-highlight bg-gradient-to-br from-orange-50/50 to-blue-50/50 dark:from-orange-900/10 dark:to-blue-900/10 border border-gray-200 dark:border-gray-800" transition:fade={{ delay: 400 }}>
         <div class="tech-badges">
-          <span class="badge">
+          <span class="badge bg-white/30 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#FF3E00"/>
               <path d="M2 17L12 22L22 17" stroke="#FF3E00" stroke-width="2"/>
@@ -104,7 +100,7 @@
             </svg>
             @sveltejs/package
           </span>
-          <span class="badge">
+          <span class="badge bg-white/30 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="10" stroke="#40B3FF" stroke-width="2"/>
               <path d="M12 2V22" stroke="#40B3FF" stroke-width="2"/>
@@ -113,7 +109,7 @@
             SvelteKit
           </span>
         </div>
-        <p>
+        <p class="text-gray-700 dark:text-gray-300">
           Built with modern tooling for a fast, efficient workflow that delivers
           exceptional performance and developer experience.
         </p>
@@ -208,12 +204,6 @@
     50% { background-position: 100% 50%; }
   }
 
-  .domain {
-    color: rgba(0, 0, 0, 0.7);
-    font-weight: 400;
-    opacity: 0.8;
-  }
-
   .click-counter {
     font-size: 0.75rem;
     background: linear-gradient(135deg, #40B3FF, #2DD4BF);
@@ -244,7 +234,6 @@
     gap: 0.5rem;
     margin-top: 1rem;
     font-size: 0.9rem;
-    color: rgba(0, 0, 0, 0.5);
     opacity: 0;
     animation: fadeIn 0.5s ease-out 1s forwards;
   }
@@ -275,22 +264,16 @@
     font-size: 1.5rem;
     line-height: 1.5;
     font-weight: 500;
-    color: rgba(0, 0, 0, 0.95);
     max-width: 40ch;
     margin: 0;
   }
 
   .feature-highlight {
-    background: linear-gradient(135deg,
-      rgba(255, 62, 0, 0.05) 0%,
-      rgba(64, 179, 255, 0.05) 100%);
     border-radius: 1.5rem;
     padding: 2rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
   }
 
   .feature-highlight p {
-    color: rgba(0, 0, 0, 0.7);
     line-height: 1.65;
     margin: 0;
   }
@@ -307,18 +290,15 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.625rem 1.25rem;
-    background: rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 2rem;
     font-size: 0.9rem;
     font-weight: 600;
-    color: rgba(0, 0, 0, 0.7);
     transition: all 0.2s ease;
   }
 
   .badge:hover {
     transform: translateY(-2px);
-    border-color: #FF3E00;
+    border-color: #FF3E00 !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 
@@ -360,40 +340,6 @@
 
   .cta-link:hover .arrow-icon {
     transform: translateX(4px);
-  }
-
-  /* Dark mode styles using data-theme attribute */
-  :global([data-theme="dark"]) .domain {
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  :global([data-theme="dark"]) .subtitle {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  :global([data-theme="dark"]) .lead {
-    color: rgba(255, 255, 255, 0.95);
-  }
-
-  :global([data-theme="dark"]) .feature-highlight {
-    background: linear-gradient(135deg,
-      rgba(255, 62, 0, 0.1) 0%,
-      rgba(64, 179, 255, 0.1) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  :global([data-theme="dark"]) .feature-highlight p {
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  :global([data-theme="dark"]) .badge {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  :global([data-theme="dark"]) .badge:hover {
-    border-color: #FF3E00;
   }
 
   @keyframes fadeIn {

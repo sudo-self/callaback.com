@@ -1,12 +1,6 @@
 {
 	"/": [],
 	"/about": [],
-	"/api/export": [
-		"src/routes/api/export/+server.js"
-	],
-	"/api/import": [
-		"src/routes/api/import/+server.js"
-	],
 	"/api/todos": [
 		"src/routes/api/todos/+server.js"
 	],
