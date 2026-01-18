@@ -6,9 +6,17 @@
   let windowWidth: number;
   let isMenuOpen = $state(false);
   let isScrolled = $state(false);
+  let darkMode = $state(false);
 
   onMount(() => {
     windowWidth = window.innerWidth;
+    
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      darkMode = true;
+      document.documentElement.classList.add('dark');
+    }
     
     // Handle scroll effect
     window.addEventListener('scroll', handleScroll);
@@ -39,6 +47,18 @@
 
   function handleScroll() {
     isScrolled = window.scrollY > 10;
+  }
+
+  // Toggle dark/light mode
+  function toggleTheme() {
+    darkMode = !darkMode;
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
   }
 
   // Handle link clicks - close menu and navigate
@@ -112,59 +132,122 @@
     </a>
 
     <!-- Desktop Navigation -->
-    <ul class="hidden md:flex items-center space-x-6">
-      <li>
-        <a
-          href="/"
-          class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/' ? 'bg-white/20 text-white' : ''}"
-          aria-current={$page.url?.pathname === '/' ? 'page' : undefined}
+    <div class="hidden md:flex items-center space-x-6">
+      <!-- Navigation Links -->
+      <ul class="flex items-center space-x-6">
+        <li>
+          <a
+            href="/about"
+            class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/about' ? 'bg-white/20 text-white' : ''}"
+            aria-current={$page.url?.pathname === '/about' ? 'page' : undefined}
+          >
+            About
+          </a>
+        </li>
+        <li>
+          <a
+            href="/todo"
+            class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/todo' ? 'bg-white/20 text-white' : ''}"
+            aria-current={$page.url?.pathname === '/todo' ? 'page' : undefined}
+          >
+            Todo
+          </a>
+        </li>
+      </ul>
+
+      <!-- Divider -->
+      <div class="h-6 w-px bg-white/30"></div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-4">
+        <!-- Theme Toggle -->
+        <button
+          onclick={toggleTheme}
+          class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+          type="button"
         >
-          Home
-        </a>
-      </li>
-      <li>
-        <a
-          href="/about"
-          class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/about' ? 'bg-white/20 text-white' : ''}"
-          aria-current={$page.url?.pathname === '/about' ? 'page' : undefined}
-        >
-          About
-        </a>
-      </li>
-      <li>
-        <a
-          href="/todo"
-          class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/todo' ? 'bg-white/20 text-white' : ''}"
-          aria-current={$page.url?.pathname === '/todo' ? 'page' : undefined}
-        >
-          Todo
-        </a>
-      </li>
-      <li>
+          <!-- Sun Icon (Light Mode) -->
+          <svg
+            class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          
+          <!-- Moon Icon (Dark Mode) -->
+          <svg
+            class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
+        <!-- Contact Us Button -->
         <a
           href="mailto:support@callaback.com"
-          class="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-6 py-2.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95"
+          class="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-6 py-2.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95 whitespace-nowrap"
         >
           Contact Us
         </a>
-      </li>
-    </ul>
+      </div>
+    </div>
 
     <!-- Mobile Menu Button -->
-    <button
-      class="md:hidden relative w-10 h-10 flex flex-col justify-center items-center group focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-lg"
-      onclick={toggleMenu}
-      aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-      aria-expanded={isMenuOpen}
-      type="button"
-    >
-      <span class="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
-      <div class="space-y-1.5">
-        <div class="w-6 h-0.5 bg-white transition-all duration-300 {isMenuOpen ? 'rotate-45 translate-y-2' : ''}"></div>
-        <div class="w-6 h-0.5 bg-white transition-all duration-300 {isMenuOpen ? 'opacity-0' : ''}"></div>
-        <div class="w-6 h-0.5 bg-white transition-all duration-300 {isMenuOpen ? '-rotate-45 -translate-y-2' : ''}"></div>
-      </div>
-    </button>
+    <div class="md:hidden flex items-center space-x-4">
+      <!-- Mobile Theme Toggle -->
+      <button
+        onclick={toggleTheme}
+        class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        type="button"
+      >
+        <!-- Sun Icon (Light Mode) -->
+        <svg
+          class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        
+        <!-- Moon Icon (Dark Mode) -->
+        <svg
+          class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+
+      <!-- Mobile Menu Toggle Button -->
+      <button
+        class="relative w-10 h-10 flex flex-col justify-center items-center group focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-lg"
+        onclick={toggleMenu}
+        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={isMenuOpen}
+        type="button"
+      >
+        <span class="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
+        <div class="space-y-1.5">
+          <div class="w-6 h-0.5 bg-white transition-all duration-300 {isMenuOpen ? 'rotate-45 translate-y-2' : ''}"></div>
+          <div class="w-6 h-0.5 bg-white transition-all duration-300 {isMenuOpen ? 'opacity-0' : ''}"></div>
+          <div class="w-6 h-0.5 bg-white transition-all duration-300 {isMenuOpen ? '-rotate-45 -translate-y-2' : ''}"></div>
+        </div>
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -214,19 +297,6 @@
         <ul class="space-y-2 flex-1">
           <li>
             <a
-              href="/"
-              onclick={handleMobileLinkClick}
-              class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/' ? 'bg-white/20 text-white' : ''}"
-              aria-current={$page.url?.pathname === '/' ? 'page' : undefined}
-            >
-              <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Home
-            </a>
-          </li>
-          <li>
-            <a
               href="/about"
               onclick={handleMobileLinkClick}
               class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/about' ? 'bg-white/20 text-white' : ''}"
@@ -251,7 +321,37 @@
               Todo
             </a>
           </li>
-          <li class="mt-8 pt-6 border-t border-white/20">
+          
+          <!-- Mobile Theme Toggle -->
+          <li class="mt-6 pt-6 border-t border-white/20">
+            <button
+              onclick={() => {
+                toggleTheme();
+                closeMenu();
+              }}
+              class="flex items-center justify-between w-full px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              type="button"
+            >
+              <div class="flex items-center gap-3">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {#if darkMode}
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  {:else}
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  {/if}
+                </svg>
+                <span class="text-lg font-medium text-white">
+                  {darkMode ? 'Light Mode' : 'Dark Mode'}
+                </span>
+              </div>
+              <span class="text-white/70 text-sm">
+                {darkMode ? 'Switch to light' : 'Switch to dark'}
+              </span>
+            </button>
+          </li>
+
+          <li class="mt-4">
             <a
               href="mailto:support@callaback.com"
               onclick={handleMobileLinkClick}
@@ -292,5 +392,10 @@
   /* Prevent scrolling when menu is open */
   body.menu-open {
     overflow: hidden;
+  }
+
+  /* Smooth theme transition */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 </style>
