@@ -1,19 +1,33 @@
-import { $ as attr, a3 as ensure_array_like } from "../../../chunks/index.js";
+import { _ as attr_class, a1 as store_get, a3 as ensure_array_like, a0 as stringify, $ as attr, a2 as unsubscribe_stores } from "../../../chunks/index.js";
+import { t as theme } from "../../../chunks/theme.js";
 import { e as escape_html } from "../../../chunks/context.js";
-const inner = `M45.41,108.86A21.81,21.81,0,0,1,22,100.18,20.2,20.2,0,0,1,18.53,84.9a19,19,0,0,1,.65-2.57l.52-1.58,1.41,1a35.32,35.32,0,0,0,10.75,5.37l1,.31-.1,1a6.2,6.2,0,0,0,1.11,4.08A6.57,6.57,0,0,0,41,95.19a6,6,0,0,0,1.68-.74L70.11,76.94a5.76,5.76,0,0,0,2.59-3.83,6.09,6.09,0,0,0-1-4.6,6.58,6.58,0,0,0-7.06-2.62,6.21,6.21,0,0,0-1.69.74L52.43,73.31a19.88,19.88,0,0,1-5.58,2.45,21.82,21.82,0,0,1-23.43-8.68A20.2,20.2,0,0,1,20,51.8a19,19,0,0,1,8.56-12.7L56,21.59a19.88,19.88,0,0,1,5.58-2.45A21.81,21.81,0,0,1,85,27.82,20.2,20.2,0,0,1,88.47,43.1a19,19,0,0,1-.65,2.57l-.52,1.58-1.41-1a35.32,35.32,0,0,0-10.75-5.37l-1-.31.1-1a6.2,6.2,0,0,0-1.11-4.08,6.57,6.57,0,0,0-7.06-2.62,6,6,0,0,0-1.68.74L36.89,51.06a5.71,5.71,0,0,0-2.58,3.83,6,6,0,0,0,1,4.6,6.58,6.58,0,0,0,7.06,2.62,6.21,6.21,0,0,0,1.69-.74l10.48-6.68a19.88,19.88,0,0,1,5.58-2.45,21.82,21.82,0,0,1,23.43,8.68A20.2,20.2,0,0,1,87,76.2a19,19,0,0,1-8.56,12.7L51,106.41a19.88,19.88,0,0,1-5.58,2.45`;
-const outer = `M65,34 L37,52 A1 1 0 0 0 44 60 L70.5,44.5 A1 1 0 0 0 65,34Z M64,67 L36,85 A1 1 0 0 0 42 94 L68,77.5 A1 1 0 0 0 64,67Z`;
-function _page($$renderer) {
-  {
-    $$renderer.push("<!--[-->");
-    $$renderer.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 103 124" class="svelte-cwls5q"><g opacity="0.2"><path style="stroke: #ff3e00; fill: #ff3e00; stroke-width: 50;"${attr("d", outer)} class="svelte-cwls5q"></path><path style="stroke:#ff3e00; stroke-width: 1.5"${attr("d", inner)} class="svelte-cwls5q"></path></g></svg> <div class="centered svelte-cwls5q"><!--[-->`);
-    const each_array = ensure_array_like("callaback.com");
-    for (let i = 0, $$length = each_array.length; i < $$length; i++) {
-      let char = each_array[i];
-      $$renderer.push(`<span class="letter svelte-cwls5q">${escape_html(char)}</span>`);
+function _page($$renderer, $$props) {
+  $$renderer.component(($$renderer2) => {
+    var $$store_subs;
+    let messages = [];
+    let input = "";
+    let loading = false;
+    let typingInterval;
+    {
+      {
+        clearInterval(typingInterval);
+      }
     }
-    $$renderer.push(`<!--]--></div>`);
-  }
-  $$renderer.push(`<!--]--> <link href="https://fonts.googleapis.com/css?family=Overpass:100,400" rel="stylesheet"/>`);
+    $$renderer2.push(`<section${attr_class("chat-page svelte-cwls5q", void 0, {
+      "dark": store_get($$store_subs ??= {}, "$theme", theme) === "dark"
+    })}><header class="chat-header svelte-cwls5q"><h1 class="svelte-cwls5q"><span class="brand-gradient svelte-cwls5q">callaback</span><span class="domain svelte-cwls5q">.ai</span></h1> <p class="subtitle svelte-cwls5q">Talk to the Callaback assistant</p></header> <div class="chat-shell svelte-cwls5q"><div class="chat-messages svelte-cwls5q"><!--[-->`);
+    const each_array = ensure_array_like(messages);
+    for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
+      let msg = each_array[$$index];
+      $$renderer2.push(`<div${attr_class(`message ${stringify(msg.role)}`, "svelte-cwls5q")}>${escape_html(msg.content)}</div>`);
+    }
+    $$renderer2.push(`<!--]--> `);
+    {
+      $$renderer2.push("<!--[!-->");
+    }
+    $$renderer2.push(`<!--]--> <div></div></div> <form class="chat-input svelte-cwls5q"><input placeholder="Ask something…"${attr("value", input)}${attr("disabled", loading, true)} autocomplete="off" class="input-field svelte-cwls5q"/> <button${attr("disabled", !input.trim(), true)} class="svelte-cwls5q">Send</button></form></div></section>`);
+    if ($$store_subs) unsubscribe_stores($$store_subs);
+  });
 }
 export {
   _page as default

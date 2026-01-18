@@ -101,7 +101,7 @@
             class="text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 {$page.url?.pathname === '/about' ? 'bg-white/20 text-white' : ''}"
             aria-current={$page.url?.pathname === '/about' ? 'page' : undefined}
           >
-            About
+            LLM
           </a>
         </li>
         <li>

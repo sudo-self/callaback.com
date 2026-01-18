@@ -1,10 +1,11 @@
 import { _ as attr_class, $ as attr, a0 as stringify, a1 as store_get, a2 as unsubscribe_stores, a3 as ensure_array_like, a4 as head } from "../../chunks/index.js";
 import { g as getContext, e as escape_html } from "../../chunks/context.js";
 import "@sveltejs/kit/internal";
-import { w as writable } from "../../chunks/exports.js";
+import "../../chunks/exports.js";
 import "../../chunks/utils2.js";
 import "@sveltejs/kit/internal/server";
 import "../../chunks/state.svelte.js";
+import { t as theme } from "../../chunks/theme.js";
 const getStores = () => {
   const stores$1 = getContext("__svelte__");
   return {
@@ -26,19 +27,6 @@ const page = {
     return store.subscribe(fn);
   }
 };
-function createThemeStore() {
-  const { subscribe, set, update } = writable("light");
-  return {
-    subscribe,
-    toggle: () => {
-      update((current) => {
-        const newTheme = current === "light" ? "dark" : "light";
-        return newTheme;
-      });
-    }
-  };
-}
-const theme = createThemeStore();
 function Navbar($$renderer, $$props) {
   $$renderer.component(($$renderer2) => {
     var $$store_subs;
@@ -46,7 +34,7 @@ function Navbar($$renderer, $$props) {
     $$renderer2.push(`<nav${attr_class(
       `fixed top-0 left-0 right-0 z-50 px-4 py-3 transition-all duration-300 ${stringify("bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700")}`,
       "svelte-rfuq4y"
-    )} role="navigation" aria-label="Main navigation"><div class="max-w-7xl mx-auto flex justify-between items-center svelte-rfuq4y"><a href="/" class="flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-lg p-1 transition-transform hover:scale-105 svelte-rfuq4y" aria-label="Callaback Home"><img src="/Logo.png" alt="Callaback Logo" class="w-10 h-10 rounded-lg svelte-rfuq4y" width="40" height="40" loading="eager"/> <span class="text-2xl font-bold text-white dark:text-white tracking-tight svelte-rfuq4y">callaback<span class="text-orange-200 dark:text-orange-300 svelte-rfuq4y">.com</span></span></a> <div class="hidden md:flex items-center space-x-6 svelte-rfuq4y"><ul class="flex items-center space-x-6 svelte-rfuq4y"><li class="svelte-rfuq4y"><a href="/about"${attr_class(`text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 ${stringify(store_get($$store_subs ??= {}, "$page", page).url?.pathname === "/about" ? "bg-white/20 text-white" : "")}`, "svelte-rfuq4y")}${attr("aria-current", store_get($$store_subs ??= {}, "$page", page).url?.pathname === "/about" ? "page" : void 0)}>About</a></li> <li class="svelte-rfuq4y"><a href="/todo"${attr_class(`text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 ${stringify(store_get($$store_subs ??= {}, "$page", page).url?.pathname === "/todo" ? "bg-white/20 text-white" : "")}`, "svelte-rfuq4y")}${attr("aria-current", store_get($$store_subs ??= {}, "$page", page).url?.pathname === "/todo" ? "page" : void 0)}>Todo</a></li></ul> <div class="h-6 w-px bg-white/30 svelte-rfuq4y"></div> <div class="flex items-center space-x-4 svelte-rfuq4y"><a href="mailto:support@callaback.com" class="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-6 py-2.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95 whitespace-nowrap svelte-rfuq4y">Contact Us</a> <button class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white svelte-rfuq4y"${attr("aria-label", store_get($$store_subs ??= {}, "$theme", theme) === "dark" ? "Switch to light mode" : "Switch to dark mode")} type="button">`);
+    )} role="navigation" aria-label="Main navigation"><div class="max-w-7xl mx-auto flex justify-between items-center svelte-rfuq4y"><a href="/" class="flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-lg p-1 transition-transform hover:scale-105 svelte-rfuq4y" aria-label="Callaback Home"><img src="/Logo.png" alt="Callaback Logo" class="w-10 h-10 rounded-lg svelte-rfuq4y" width="40" height="40" loading="eager"/> <span class="text-2xl font-bold text-white dark:text-white tracking-tight svelte-rfuq4y">callaback<span class="text-orange-200 dark:text-orange-300 svelte-rfuq4y">.com</span></span></a> <div class="hidden md:flex items-center space-x-6 svelte-rfuq4y"><ul class="flex items-center space-x-6 svelte-rfuq4y"><li class="svelte-rfuq4y"><a href="/about"${attr_class(`text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 ${stringify(store_get($$store_subs ??= {}, "$page", page).url?.pathname === "/about" ? "bg-white/20 text-white" : "")}`, "svelte-rfuq4y")}${attr("aria-current", store_get($$store_subs ??= {}, "$page", page).url?.pathname === "/about" ? "page" : void 0)}>LLM</a></li> <li class="svelte-rfuq4y"><a href="/todo"${attr_class(`text-white/90 hover:text-white font-medium px-3 py-2 rounded-lg transition-colors hover:bg-white/10 ${stringify(store_get($$store_subs ??= {}, "$page", page).url?.pathname === "/todo" ? "bg-white/20 text-white" : "")}`, "svelte-rfuq4y")}${attr("aria-current", store_get($$store_subs ??= {}, "$page", page).url?.pathname === "/todo" ? "page" : void 0)}>Todo</a></li></ul> <div class="h-6 w-px bg-white/30 svelte-rfuq4y"></div> <div class="flex items-center space-x-4 svelte-rfuq4y"><a href="mailto:support@callaback.com" class="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-6 py-2.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95 whitespace-nowrap svelte-rfuq4y">Contact Us</a> <button class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white svelte-rfuq4y"${attr("aria-label", store_get($$store_subs ??= {}, "$theme", theme) === "dark" ? "Switch to light mode" : "Switch to dark mode")} type="button">`);
     if (store_get($$store_subs ??= {}, "$theme", theme) === "dark") {
       $$renderer2.push("<!--[-->");
       $$renderer2.push(`<svg class="w-5 h-5 text-white svelte-rfuq4y" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" class="svelte-rfuq4y"></path></svg>`);

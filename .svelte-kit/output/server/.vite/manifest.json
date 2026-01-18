@@ -19,10 +19,7 @@
   },
   "_exports.js": {
     "file": "chunks/exports.js",
-    "name": "exports",
-    "imports": [
-      "_context.js"
-    ]
+    "name": "exports"
   },
   "_index.js": {
     "file": "chunks/index.js",
@@ -30,6 +27,13 @@
     "imports": [
       "_context.js",
       "_utils.js"
+    ]
+  },
+  "_index2.js": {
+    "file": "chunks/index2.js",
+    "name": "index",
+    "imports": [
+      "_context.js"
     ]
   },
   "_internal.js": {
@@ -54,6 +58,13 @@
     "name": "state.svelte",
     "imports": [
       "_context.js"
+    ]
+  },
+  "_theme.js": {
+    "file": "chunks/theme.js",
+    "name": "theme",
+    "imports": [
+      "_index2.js"
     ]
   },
   "_utils.js": {
@@ -84,7 +95,8 @@
       "_context.js",
       "_state.svelte.js",
       "_exports.js",
-      "_utils2.js"
+      "_utils2.js",
+      "_index2.js"
     ]
   },
   "node_modules/.pnpm/@sveltejs+kit@2.50.0_@sveltejs+vite-plugin-svelte@6.2.4_svelte@5.46.4_vite@7.3.1_@types_936c2f9564f17373a3addea7ddd1eade/node_modules/@sveltejs/kit/src/runtime/server/index.js": {
@@ -99,6 +111,7 @@
       "_index.js",
       "_exports.js",
       "_utils2.js",
+      "_index2.js",
       "_internal.js"
     ]
   },
@@ -112,10 +125,11 @@
       "_context.js",
       "_exports.js",
       "_utils2.js",
-      "_state.svelte.js"
+      "_state.svelte.js",
+      "_theme.js"
     ],
     "css": [
-      "_app/immutable/assets/_layout.hMpnLANg.css"
+      "_app/immutable/assets/_layout.-1dT0G7v.css"
     ]
   },
   "src/routes/+page.svelte": {
@@ -137,10 +151,11 @@
     "isEntry": true,
     "imports": [
       "_index.js",
+      "_theme.js",
       "_context.js"
     ],
     "css": [
-      "_app/immutable/assets/_page.C4F1yWY-.css"
+      "_app/immutable/assets/_page.BOmTlWp9.css"
     ]
   },
   "src/routes/api/todos/+server.js": {
