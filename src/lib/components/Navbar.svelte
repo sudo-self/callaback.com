@@ -154,7 +154,7 @@
         </a>
 
         <button
-          onclick={toggleTheme}
+          on:click={toggleTheme}
           class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
           aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           type="button"
@@ -184,7 +184,7 @@
 
     <div class="md:hidden flex items-center space-x-4">
       <button
-        onclick={toggleTheme}
+        on:click={toggleTheme}
         class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
         aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         type="button"
@@ -212,7 +212,7 @@
 
       <button
         class="relative w-10 h-10 flex flex-col justify-center items-center group focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-lg"
-        onclick={toggleMenu}
+        on:click={toggleMenu}
         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMenuOpen}
         type="button"
@@ -231,7 +231,7 @@
 {#if isMenuOpen}
   <div
     class="mobile-backdrop md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-    onclick={handleBackdropClick}
+    on:click={handleBackdropClick}
     transition:fade={{ duration: 200 }}
     role="dialog"
     aria-modal="true"
@@ -239,7 +239,7 @@
   >
     <div
       class="absolute right-0 top-0 h-full w-80 bg-gradient-to-b from-orange-600 to-orange-700 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
-      onclick={(e) => e.stopPropagation()}
+      on:click={(e) => e.stopPropagation()}
       transition:slide={{ duration: 300, easing: cubicOut }}
     >
       <div class="p-8 h-full flex flex-col">
@@ -257,7 +257,7 @@
             </span>
           </div>
           <button
-            onclick={handleCloseClick}
+            on:click={handleCloseClick}
             class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
             aria-label="Close menu"
             type="button"
@@ -272,7 +272,7 @@
           <li>
             <a
               href="/about"
-              onclick={handleMobileLinkClick}
+              on:click={handleMobileLinkClick}
               class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/about' ? 'bg-white/20 text-white' : ''}"
               aria-current={$page.url?.pathname === '/about' ? 'page' : undefined}
             >
@@ -285,7 +285,7 @@
           <li>
             <a
               href="/todo"
-              onclick={handleMobileLinkClick}
+              on:click={handleMobileLinkClick}
               class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/todo' ? 'bg-white/20 text-white' : ''}"
               aria-current={$page.url?.pathname === '/todo' ? 'page' : undefined}
             >
@@ -298,7 +298,7 @@
           
           <li class="mt-6 pt-6 border-t border-white/20">
             <button
-              onclick={() => {
+              on:click={() => {
                 toggleTheme();
                 closeMenu();
               }}
@@ -327,7 +327,7 @@
           <li class="mt-4">
             <a
               href="mailto:support@callaback.com"
-              onclick={handleMobileLinkClick}
+              on:click={handleMobileLinkClick}
               class="flex items-center justify-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-semibold text-lg px-6 py-3.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -365,6 +365,6 @@
   }
 
   * {
-    transition: background-color 0.3s ease, border-color 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
 </style>
