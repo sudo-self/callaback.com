@@ -1,28 +1,43 @@
 import { json } from '@sveltejs/kit';
-import { error as svelteError } from '@sveltejs/kit';
 
-// GET single todo by ID
+// GET single todo
 export async function GET({ params, platform }) {
   try {
     const id = parseInt(params.id);
     
     if (isNaN(id) || id <= 0) {
-      throw svelteError(400, 'Invalid todo ID');
+      return json({ 
+        success: false, 
+        error: 'Invalid todo ID'
+      }, { status: 400 });
     }
     
-    const result = await platform.DB.prepare(
-      `SELECT 
+    const db = platform?.env?.DB;
+    if (!db) {
+      return json({ 
+        success: false, 
+        error: 'Database not available'
+      }, { status: 500 });
+    }
+    
+    const stmt = db.prepare(`
+      SELECT 
         id,
         description,
         done,
         datetime(created_at, 'localtime') as created_at,
         datetime(updated_at, 'localtime') as updated_at
-       FROM todos 
-       WHERE id = ?`
-    ).bind(id).first();
+      FROM todos 
+      WHERE id = ?
+    `).bind(id);
+    
+    const result = await stmt.first();
     
     if (!result) {
-      throw svelteError(404, 'Todo not found');
+      return json({ 
+        success: false, 
+        error: 'Todo not found'
+      }, { status: 404 });
     }
     
     const todo = {
@@ -33,19 +48,17 @@ export async function GET({ params, platform }) {
       updated_at: result.updated_at
     };
     
-    return json({ success: true, data: todo });
+    return json({ 
+      success: true, 
+      data: todo
+    });
+    
   } catch (error) {
-    console.error(`GET todo ${params.id} error:`, error);
-    
-    // If it's a SvelteKit error, rethrow it
-    if (error.status) {
-      throw error;
-    }
-    
+    console.error('API GET [id] Error:', error);
     return json({ 
       success: false, 
       error: 'Failed to fetch todo',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }
@@ -57,47 +70,48 @@ export async function PUT({ params, request, platform }) {
     const data = await request.json();
     
     if (isNaN(id) || id <= 0) {
-      throw svelteError(400, 'Invalid todo ID');
+      return json({ 
+        success: false, 
+        error: 'Invalid todo ID'
+      }, { status: 400 });
     }
     
     const { description, done } = data;
     
-    // Validate input
-    if (description !== undefined && (!description || description.trim() === '')) {
+    const db = platform?.env?.DB;
+    if (!db) {
       return json({ 
         success: false, 
-        error: 'Description cannot be empty' 
-      }, { status: 400 });
+        error: 'Database not available'
+      }, { status: 500 });
     }
     
     // Check if todo exists
-    const existing = await platform.DB.prepare(
-      "SELECT id FROM todos WHERE id = ?"
-    ).bind(id).first();
-    
+    const existing = await db.prepare("SELECT id FROM todos WHERE id = ?").bind(id).first();
     if (!existing) {
-      throw svelteError(404, 'Todo not found');
+      return json({ 
+        success: false, 
+        error: 'Todo not found'
+      }, { status: 404 });
     }
     
     // Update todo
-    const result = await platform.DB.prepare(
-      `UPDATE todos 
-       SET 
-         description = COALESCE(?, description),
-         done = COALESCE(?, done),
-         updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?
-       RETURNING 
-         id,
-         description,
-         done,
-         datetime(created_at, 'localtime') as created_at,
-         datetime(updated_at, 'localtime') as updated_at`
-    ).bind(
-      description ? description.trim() : null,
-      done !== undefined ? (done ? 1 : 0) : null,
-      id
-    ).first();
+    const stmt = db.prepare(`
+      UPDATE todos 
+      SET 
+        description = ?,
+        done = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+      RETURNING 
+        id,
+        description,
+        done,
+        datetime(created_at, 'localtime') as created_at,
+        datetime(updated_at, 'localtime') as updated_at
+    `).bind(description.trim(), done ? 1 : 0, id);
+    
+    const result = await stmt.first();
     
     const updatedTodo = {
       id: result.id,
@@ -107,62 +121,75 @@ export async function PUT({ params, request, platform }) {
       updated_at: result.updated_at
     };
     
-    return json({ success: true, data: updatedTodo });
+    return json({ 
+      success: true, 
+      data: updatedTodo,
+      message: 'Todo updated successfully'
+    });
+    
   } catch (error) {
-    console.error(`PUT todo ${params.id} error:`, error);
-    
-    if (error.status) {
-      throw error;
-    }
-    
+    console.error('API PUT Error:', error);
     return json({ 
       success: false, 
       error: 'Failed to update todo',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }
 
-// PATCH - Partial update (toggle done status)
+// PATCH - Toggle todo status
 export async function PATCH({ params, request, platform }) {
   try {
     const id = parseInt(params.id);
+    const data = await request.json();
     
     if (isNaN(id) || id <= 0) {
-      throw svelteError(400, 'Invalid todo ID');
+      return json({ 
+        success: false, 
+        error: 'Invalid todo ID'
+      }, { status: 400 });
     }
     
-    const data = await request.json();
     const { done } = data;
     
     if (done === undefined) {
       return json({ 
         success: false, 
-        error: 'Done status is required for PATCH' 
+        error: 'Done status is required'
       }, { status: 400 });
     }
     
-    // Check if todo exists
-    const existing = await platform.DB.prepare(
-      "SELECT id FROM todos WHERE id = ?"
-    ).bind(id).first();
-    
-    if (!existing) {
-      throw svelteError(404, 'Todo not found');
+    const db = platform?.env?.DB;
+    if (!db) {
+      return json({ 
+        success: false, 
+        error: 'Database not available'
+      }, { status: 500 });
     }
     
-    // Update only the done status
-    const result = await platform.DB.prepare(
-      `UPDATE todos 
-       SET done = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?
-       RETURNING 
-         id,
-         description,
-         done,
-         datetime(created_at, 'localtime') as created_at,
-         datetime(updated_at, 'localtime') as updated_at`
-    ).bind(done ? 1 : 0, id).first();
+    // Update only done status
+    const stmt = db.prepare(`
+      UPDATE todos 
+      SET 
+        done = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+      RETURNING 
+        id,
+        description,
+        done,
+        datetime(created_at, 'localtime') as created_at,
+        datetime(updated_at, 'localtime') as updated_at
+    `).bind(done ? 1 : 0, id);
+    
+    const result = await stmt.first();
+    
+    if (!result) {
+      return json({ 
+        success: false, 
+        error: 'Todo not found'
+      }, { status: 404 });
+    }
     
     const updatedTodo = {
       id: result.id,
@@ -172,60 +199,63 @@ export async function PATCH({ params, request, platform }) {
       updated_at: result.updated_at
     };
     
-    return json({ success: true, data: updatedTodo });
+    return json({ 
+      success: true, 
+      data: updatedTodo,
+      message: 'Todo status updated'
+    });
+    
   } catch (error) {
-    console.error(`PATCH todo ${params.id} error:`, error);
-    
-    if (error.status) {
-      throw error;
-    }
-    
+    console.error('API PATCH Error:', error);
     return json({ 
       success: false, 
-      error: 'Failed to update todo',
-      details: error.message 
+      error: 'Failed to update todo status',
+      details: error.message
     }, { status: 500 });
   }
 }
 
-// DELETE - Remove todo
+// DELETE - Remove single todo
 export async function DELETE({ params, platform }) {
   try {
     const id = parseInt(params.id);
     
     if (isNaN(id) || id <= 0) {
-      throw svelteError(400, 'Invalid todo ID');
+      return json({ 
+        success: false, 
+        error: 'Invalid todo ID'
+      }, { status: 400 });
     }
     
-    // Check if todo exists
-    const existing = await platform.DB.prepare(
-      "SELECT id FROM todos WHERE id = ?"
-    ).bind(id).first();
-    
-    if (!existing) {
-      throw svelteError(404, 'Todo not found');
+    const db = platform?.env?.DB;
+    if (!db) {
+      return json({ 
+        success: false, 
+        error: 'Database not available'
+      }, { status: 500 });
     }
     
-    // Delete todo
-    await platform.DB.prepare(
-      "DELETE FROM todos WHERE id = ?"
-    ).bind(id).run();
+    // Delete the todo
+    const { success } = await db.prepare("DELETE FROM todos WHERE id = ?").bind(id).run();
+    
+    if (!success) {
+      return json({ 
+        success: false, 
+        error: 'Todo not found'
+      }, { status: 404 });
+    }
     
     return json({ 
       success: true, 
-      message: 'Todo deleted successfully' 
+      message: 'Todo deleted successfully'
     });
+    
   } catch (error) {
-    console.error(`DELETE todo ${params.id} error:`, error);
-    
-    if (error.status) {
-      throw error;
-    }
-    
+    console.error('API DELETE [id] Error:', error);
     return json({ 
       success: false, 
       error: 'Failed to delete todo',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }

@@ -1,130 +1,123 @@
 import { json } from '@sveltejs/kit';
 
+// GET all todos
 export async function GET({ platform }) {
   try {
-    console.log('API: Getting todos from D1');
+    console.log('API: Getting todos from D1 database');
     
-    // Check if platform.DB exists
-    if (!platform || !platform.DB) {
-      console.error('API Error: platform.DB is not available');
-      return json({
-        success: false,
-        error: 'Database not available',
-        platform: !!platform,
-        db: !!platform?.DB
+    // Use platform.env.DB (not platform.DB)
+    const db = platform?.env?.DB;
+    
+    if (!db) {
+      console.error('ERROR: D1 database not available. Check wrangler.toml binding.');
+      console.log('Platform:', platform);
+      console.log('Platform.env:', platform?.env);
+      return json({ 
+        success: false, 
+        error: 'Database connection not configured',
+        details: 'platform.env.DB is undefined'
       }, { status: 500 });
     }
-
+    
+    // First, try to create table if it doesn't exist
     try {
-      const { results } = await platform.DB.prepare(
-        `SELECT 
-          id,
-          description,
-          done,
-          datetime(created_at, 'localtime') as created_at,
-          datetime(updated_at, 'localtime') as updated_at
-         FROM todos 
-         ORDER BY created_at DESC`
-      ).all();
-      
-      console.log(`API: Found ${results?.length || 0} todos`);
-      
-      // Convert SQLite boolean (0/1) to JavaScript boolean
-      const todos = (results || []).map(todo => ({
-        id: todo.id,
-        description: todo.description,
-        done: Boolean(todo.done),
-        created_at: todo.created_at,
-        updated_at: todo.updated_at
-      }));
-      
-      return json({
-        success: true,
-        data: todos,
-        count: todos.length
-      });
-    } catch (dbError) {
-      console.error('Database query error:', dbError);
-      
-      // Try to create table if it doesn't exist
-      try {
-        await platform.DB.exec(`
-          CREATE TABLE IF NOT EXISTS todos (
-            id INTEGER PRIMARY KEY,
-            description TEXT NOT NULL,
-            done BOOLEAN DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-          )
-        `);
-        
-        console.log('Created todos table');
-        return json({ success: true, data: [], count: 0, tableCreated: true });
-      } catch (createError) {
-        console.error('Failed to create table:', createError);
-        return json({
-          success: false,
-          error: 'Database error',
-          details: createError.message
-        }, { status: 500 });
-      }
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS todos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          description TEXT NOT NULL,
+          done BOOLEAN DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      console.log('D1: Table checked/created');
+    } catch (createError) {
+      console.error('D1: Table creation error:', createError);
     }
+    
+    // Get all todos
+    const stmt = db.prepare(`
+      SELECT 
+        id,
+        description,
+        done,
+        datetime(created_at, 'localtime') as created_at,
+        datetime(updated_at, 'localtime') as updated_at
+      FROM todos 
+      ORDER BY created_at DESC
+    `);
+    
+    const { results } = await stmt.all();
+    console.log(`D1: Found ${results?.length || 0} todos`);
+    
+    const todos = (results || []).map(todo => ({
+      id: todo.id,
+      description: todo.description,
+      done: Boolean(todo.done),
+      created_at: todo.created_at,
+      updated_at: todo.updated_at
+    }));
+    
+    return json({ 
+      success: true, 
+      data: todos,
+      count: todos.length,
+      message: 'Todos loaded successfully'
+    });
+    
   } catch (error) {
-    console.error('API GET todos error:', error);
-    return json({
-      success: false,
-      error: 'Server error',
+    console.error('API GET Error:', error);
+    console.error('Error stack:', error.stack);
+    return json({ 
+      success: false, 
+      error: 'Failed to fetch todos',
       details: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      timestamp: new Date().toISOString()
     }, { status: 500 });
   }
 }
 
+// POST - Create new todo
 export async function POST({ request, platform }) {
   try {
     console.log('API: Creating new todo');
     
-    if (!platform || !platform.DB) {
-      return json({
-        success: false,
+    const db = platform?.env?.DB;
+    if (!db) {
+      return json({ 
+        success: false, 
         error: 'Database not available'
       }, { status: 500 });
     }
-
+    
     const data = await request.json();
     const { description, done = false } = data;
     
-    console.log('API: Received data:', data);
-    
-    // Validate input
+    // Validate
     if (!description || description.trim() === '') {
-      return json({
-        success: false,
+      return json({ 
+        success: false, 
         error: 'Description is required'
       }, { status: 400 });
     }
     
-    // Get next ID
-    const maxResult = await platform.DB.prepare(
-      "SELECT COALESCE(MAX(id), 0) as max_id FROM todos"
-    ).first();
+    // Insert todo (ID auto-increments)
+    const stmt = db.prepare(`
+      INSERT INTO todos (description, done) 
+      VALUES (?, ?)
+      RETURNING 
+        id,
+        description,
+        done,
+        datetime(created_at, 'localtime') as created_at,
+        datetime(updated_at, 'localtime') as updated_at
+    `).bind(description.trim(), done ? 1 : 0);
     
-    const nextId = (maxResult?.max_id || 0) + 1;
-    console.log('API: Next ID:', nextId);
+    const result = await stmt.first();
     
-    // Insert new todo
-    const result = await platform.DB.prepare(
-      `INSERT INTO todos (id, description, done) 
-       VALUES (?, ?, ?) 
-       RETURNING 
-         id,
-         description,
-         done,
-         datetime(created_at, 'localtime') as created_at,
-         datetime(updated_at, 'localtime') as updated_at`
-    ).bind(nextId, description.trim(), done ? 1 : 0).first();
-    
-    console.log('API: Insert result:', result);
+    if (!result) {
+      throw new Error('Failed to insert todo');
+    }
     
     const newTodo = {
       id: result.id,
@@ -134,28 +127,70 @@ export async function POST({ request, platform }) {
       updated_at: result.updated_at
     };
     
-    return json({
-      success: true,
+    return json({ 
+      success: true, 
       data: newTodo,
       message: 'Todo created successfully'
     }, { status: 201 });
+    
   } catch (error) {
-    console.error('API POST error:', error);
-    return json({
-      success: false,
+    console.error('API POST Error:', error);
+    return json({ 
+      success: false, 
       error: 'Failed to create todo',
       details: error.message
     }, { status: 500 });
   }
 }
 
-// For debugging - simple endpoint to test DB connection
-export async function OPTIONS() {
-  return new Response(null, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
+// DELETE - Clear completed todos
+export async function DELETE({ platform }) {
+  try {
+    console.log('API: Clearing completed todos');
+    
+    const db = platform?.env?.DB;
+    if (!db) {
+      return json({ 
+        success: false, 
+        error: 'Database not available'
+      }, { status: 500 });
     }
-  });
+    
+    // Delete completed todos
+    await db.prepare("DELETE FROM todos WHERE done = 1").run();
+    
+    // Get remaining todos
+    const { results } = await db.prepare(`
+      SELECT 
+        id,
+        description,
+        done,
+        datetime(created_at, 'localtime') as created_at,
+        datetime(updated_at, 'localtime') as updated_at
+      FROM todos 
+      ORDER BY created_at DESC
+    `).all();
+    
+    const remainingTodos = (results || []).map(todo => ({
+      id: todo.id,
+      description: todo.description,
+      done: Boolean(todo.done),
+      created_at: todo.created_at,
+      updated_at: todo.updated_at
+    }));
+    
+    return json({ 
+      success: true, 
+      data: remainingTodos,
+      message: 'Completed todos cleared'
+    });
+    
+  } catch (error) {
+    console.error('API DELETE Error:', error);
+    return json({ 
+      success: false, 
+      error: 'Failed to clear completed todos',
+      details: error.message
+    }, { status: 500 });
+  }
 }
