@@ -1,4 +1,5 @@
 <script lang="ts">
+
   import { onMount } from 'svelte';
   import { fade, slide } from 'svelte/transition';
   import { page } from '$app/stores';
@@ -39,6 +40,15 @@
 
   function handleScroll() {
     isScrolled = window.scrollY > 10;
+  }
+
+  function handleMobileLinkClick() {
+    closeMenu();
+  }
+
+  function handleCloseClick(e: MouseEvent) {
+    e.stopPropagation();
+    closeMenu();
   }
 </script>
 
@@ -128,7 +138,7 @@
   </div>
 </nav>
 
-<!-- Mobile Menu Overlay -->
+
 {#if isMenuOpen}
   <div
     class="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
@@ -158,7 +168,7 @@
             </span>
           </div>
           <button
-            onclick={closeMenu}
+            onclick={handleCloseClick}
             class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
             aria-label="Close menu"
           >
@@ -173,7 +183,7 @@
           <li>
             <a
               href="/"
-              onclick={closeMenu}
+              onclick={handleMobileLinkClick}
               class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/' ? 'bg-white/20 text-white' : ''}"
               aria-current={$page.url?.pathname === '/' ? 'page' : undefined}
             >
@@ -186,7 +196,7 @@
           <li>
             <a
               href="/about"
-              onclick={closeMenu}
+              onclick={handleMobileLinkClick}
               class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/about' ? 'bg-white/20 text-white' : ''}"
               aria-current={$page.url?.pathname === '/about' ? 'page' : undefined}
             >
@@ -199,7 +209,7 @@
           <li>
             <a
               href="/todo"
-              onclick={closeMenu}
+              onclick={handleMobileLinkClick}
               class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/todo' ? 'bg-white/20 text-white' : ''}"
               aria-current={$page.url?.pathname === '/todo' ? 'page' : undefined}
             >
@@ -212,7 +222,7 @@
           <li class="mt-8 pt-6 border-t border-white/20">
             <a
               href="mailto:support@callaback.com"
-              onclick={closeMenu}
+              onclick={handleMobileLinkClick}
               class="flex items-center justify-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-semibold text-lg px-6 py-3.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +233,7 @@
           </li>
         </ul>
 
-        <!-- Mobile Menu Footer -->
+     
         <div class="pt-6 mt-6 border-t border-white/20">
           <p class="text-white/70 text-sm">
             Everything you need to build, integrate, and scale with Callaback.
@@ -234,11 +244,10 @@
   </div>
 {/if}
 
-<!-- Add some spacing after fixed nav -->
 <div class="h-16 md:h-20"></div>
 
 <style>
-  /* Custom styles if needed */
+  /* Custom styles */
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
