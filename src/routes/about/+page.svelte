@@ -20,7 +20,7 @@
     </svg>
 
     <div class="centered" out:fly={{ y: -20, duration: 800 }}>
-        {#each 'Svelte5' as char, i}
+        {#each 'callaback.com' as char, i}
             <span 
                 class="letter"
                 in:fade|global={{ delay: 1000 + i * 150, duration: 800 }}
