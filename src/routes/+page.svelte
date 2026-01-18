@@ -9,7 +9,7 @@
 
   const confettiColors = [
     '#FF3E00', '#FF8A00', '#40B3FF', '#2DD4BF', '#FFD700'
-  ] // <-- Added closing bracket here
+  ]
 
   async function fireConfetti() {
     if (isAnimating) return
@@ -70,24 +70,24 @@
     </div>
 
     {#if isVisible}
-  <div
-    class="confetti-layer"
-    transition:fade={{ duration: 300 }}
-  >
-    <div
-      use:confetti={{
-        particleCount: 250,
-        spread: 80,
-        startVelocity: 50,
-        colors: confettiColors,
-        gravity: 0.8,
-        scalar: 1.2,
-        ticks: 300,
-        decay: 0.94
-      }}
-    />
-  </div>
-{/if}
+      <div
+        class="confetti-layer"
+        transition:fade={{ duration: 300 }}
+      >
+        <div
+          use:confetti={{
+            particleCount: 250,
+            spread: 80,
+            startVelocity: 50,
+            colors: confettiColors,
+            gravity: 0.8,
+            scalar: 1.2,
+            ticks: 300,
+            decay: 0.94
+          }}
+        />
+      </div>
+    {/if}
 
     <div class="content-grid">
       <p class="lead" transition:fade={{ delay: 200 }}>
