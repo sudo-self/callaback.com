@@ -7,32 +7,40 @@
 
     const { children } = $props();
 
-
+    // Theme state - use $state for reactivity
     let theme = $state('light');
-    let isInitialized = $state(false);
-
+    
     onMount(() => {
+        if (!browser) return;
+        
         // Check for saved theme preference or system preference
-        const saved = browser ? localStorage.getItem('theme') : null;
-        const systemDark = browser ? window.matchMedia('(prefers-color-scheme: dark)').matches : false;
+        const saved = localStorage.getItem('theme');
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         
-        theme = saved || (systemDark ? 'dark' : 'light');
+        const initialTheme = saved || (systemDark ? 'dark' : 'light');
+        theme = initialTheme;
         
-        if (browser) {
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-        }
-        
-        isInitialized = true;
+        // Apply theme immediately
+        applyTheme(initialTheme);
     });
 
-    // Theme toggle function that Navbar can call
-    function toggleTheme() {
-        theme = theme === 'light' ? 'dark' : 'light';
+    // Function to apply theme to DOM
+    function applyTheme(newTheme) {
+        if (!browser) return;
         
-        if (browser) {
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-            localStorage.setItem('theme', theme);
+        if (newTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
+        localStorage.setItem('theme', newTheme);
+    }
+
+    // Theme toggle function
+    function toggleTheme() {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        theme = newTheme;
+        applyTheme(newTheme);
     }
 </script>
 

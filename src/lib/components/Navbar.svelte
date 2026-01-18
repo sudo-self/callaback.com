@@ -3,7 +3,7 @@
   import { fade, slide } from 'svelte/transition';
   import { page } from '$app/stores';
 
-  // Use $props() instead of export let in runes mode
+  // Use $props() in runes mode
   let { theme = 'light', onToggleTheme = () => {} } = $props<{
     theme?: string;
     onToggleTheme?: () => void;
@@ -12,6 +12,14 @@
   let windowWidth = $state(0);
   let isMenuOpen = $state(false);
   let isScrolled = $state(false);
+  
+  // Track current theme from props
+  let currentTheme = $state(theme);
+
+  // React to theme prop changes
+  $effect(() => {
+    currentTheme = theme;
+  });
 
   onMount(() => {
     windowWidth = window.innerWidth;
@@ -149,10 +157,10 @@
         <button
           on:click={handleThemeToggle}
           class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-          aria-label={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={currentTheme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
           type="button"
         >
-          {#if theme === 'dark'}
+          {#if currentTheme === 'dark'}
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
@@ -169,10 +177,10 @@
       <button
         on:click={handleThemeToggle}
         class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-        aria-label={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
+        aria-label={currentTheme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
         type="button"
       >
-        {#if theme === 'dark'}
+        {#if currentTheme === 'dark'}
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
@@ -273,23 +281,23 @@
             <button
               on:click={handleThemeToggle}
               class="flex items-center justify-between w-full px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-              aria-label={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={currentTheme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
               type="button"
             >
               <div class="flex items-center gap-3">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {#if theme === 'dark'}
+                  {#if currentTheme === 'dark'}
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                   {:else}
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                   {/if}
                 </svg>
                 <span class="text-lg font-medium text-white">
-                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  {currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </span>
               </div>
               <span class="text-white/70 text-sm">
-                {theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
+                {currentTheme === 'dark' ? 'Switch to light' : 'Switch to dark'}
               </span>
             </button>
           </li>
