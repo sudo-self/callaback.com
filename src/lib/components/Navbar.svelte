@@ -11,14 +11,12 @@
   onMount(() => {
     windowWidth = window.innerWidth;
     
-    // Check for saved theme preference
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       darkMode = true;
       document.documentElement.classList.add('dark');
     }
     
-    // Handle scroll effect
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   });
@@ -32,7 +30,6 @@
 
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
-    // Prevent body scroll when menu is open
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -49,7 +46,6 @@
     isScrolled = window.scrollY > 10;
   }
 
-  // Toggle dark/light mode
   function toggleTheme() {
     darkMode = !darkMode;
     if (darkMode) {
@@ -61,7 +57,6 @@
     }
   }
 
-  // Handle link clicks - close menu and navigate
   function handleMobileLinkClick(event: MouseEvent) {
     event.preventDefault();
     const target = event.currentTarget as HTMLAnchorElement;
@@ -69,7 +64,6 @@
     
     closeMenu();
     
-    // Small delay to allow menu to close before navigation
     setTimeout(() => {
       if (href && href.startsWith('/')) {
         window.location.href = href;
@@ -79,21 +73,18 @@
     }, 150);
   }
 
-  // Close menu when clicking the backdrop (outside)
   function handleBackdropClick(event: MouseEvent) {
     if ((event.target as HTMLElement).classList.contains('mobile-backdrop')) {
       closeMenu();
     }
   }
 
-  // Close menu with Escape key
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape' && isMenuOpen) {
       closeMenu();
     }
   }
 
-  // Handle close button click
   function handleCloseClick(event: MouseEvent) {
     event.stopPropagation();
     closeMenu();
@@ -112,7 +103,6 @@
   aria-label="Main navigation"
 >
   <div class="max-w-7xl mx-auto flex justify-between items-center">
-    <!-- Logo -->
     <a
       href="/"
       class="flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-lg p-1 transition-transform hover:scale-105"
@@ -131,9 +121,7 @@
       </span>
     </a>
 
-    <!-- Desktop Navigation -->
     <div class="hidden md:flex items-center space-x-6">
-      <!-- Navigation Links -->
       <ul class="flex items-center space-x-6">
         <li>
           <a
@@ -155,19 +143,22 @@
         </li>
       </ul>
 
-      <!-- Divider -->
       <div class="h-6 w-px bg-white/30"></div>
 
-      <!-- Action Buttons -->
       <div class="flex items-center space-x-4">
-        <!-- Theme Toggle -->
+        <a
+          href="mailto:support@callaback.com"
+          class="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-6 py-2.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95 whitespace-nowrap"
+        >
+          Contact Us
+        </a>
+
         <button
           onclick={toggleTheme}
           class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
           aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           type="button"
         >
-          <!-- Sun Icon (Light Mode) -->
           <svg
             class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}"
             fill="none"
@@ -178,7 +169,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
           
-          <!-- Moon Icon (Dark Mode) -->
           <svg
             class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}"
             fill="none"
@@ -189,27 +179,16 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
           </svg>
         </button>
-
-        <!-- Contact Us Button -->
-        <a
-          href="mailto:support@callaback.com"
-          class="bg-white text-orange-600 hover:bg-orange-50 font-semibold px-6 py-2.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95 whitespace-nowrap"
-        >
-          Contact Us
-        </a>
       </div>
     </div>
 
-    <!-- Mobile Menu Button -->
     <div class="md:hidden flex items-center space-x-4">
-      <!-- Mobile Theme Toggle -->
       <button
         onclick={toggleTheme}
         class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
         aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         type="button"
       >
-        <!-- Sun Icon (Light Mode) -->
         <svg
           class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}"
           fill="none"
@@ -220,7 +199,6 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
         
-        <!-- Moon Icon (Dark Mode) -->
         <svg
           class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}"
           fill="none"
@@ -232,7 +210,6 @@
         </svg>
       </button>
 
-      <!-- Mobile Menu Toggle Button -->
       <button
         class="relative w-10 h-10 flex flex-col justify-center items-center group focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-lg"
         onclick={toggleMenu}
@@ -251,7 +228,6 @@
   </div>
 </nav>
 
-<!-- Mobile Menu -->
 {#if isMenuOpen}
   <div
     class="mobile-backdrop md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
@@ -267,7 +243,6 @@
       transition:slide={{ duration: 300, easing: cubicOut }}
     >
       <div class="p-8 h-full flex flex-col">
-        <!-- Mobile Menu Header -->
         <div class="flex items-center justify-between mb-10">
           <div class="flex items-center gap-3">
             <img
@@ -293,7 +268,6 @@
           </button>
         </div>
 
-        <!-- Mobile Menu Links -->
         <ul class="space-y-2 flex-1">
           <li>
             <a
@@ -322,7 +296,6 @@
             </a>
           </li>
           
-          <!-- Mobile Theme Toggle -->
           <li class="mt-6 pt-6 border-t border-white/20">
             <button
               onclick={() => {
@@ -375,11 +348,9 @@
   </div>
 {/if}
 
-<!-- Spacer to account for fixed navbar -->
 <div class="h-16 md:h-20"></div>
 
 <style>
-  /* Custom styles */
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -389,12 +360,10 @@
     animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
   }
 
-  /* Prevent scrolling when menu is open */
   body.menu-open {
     overflow: hidden;
   }
 
-  /* Smooth theme transition */
   * {
     transition: background-color 0.3s ease, border-color 0.3s ease;
   }
