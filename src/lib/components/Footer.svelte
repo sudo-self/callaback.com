@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { fade } from 'svelte/transition';
   import { onMount } from 'svelte';
   
@@ -37,7 +37,7 @@
   };
   
   // Function to get social icon SVG
-  function getSocialIcon(icon: string) {
+  function getSocialIcon(icon) {
     switch (icon) {
       case 'twitter':
         return {

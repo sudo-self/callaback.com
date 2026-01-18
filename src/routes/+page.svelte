@@ -3,12 +3,9 @@
   import { tick } from 'svelte'
   import { fade, fly } from 'svelte/transition'
 
-  let isVisible = $state(false)
-  let clickCount = $state(0)
-  let isAnimating = $state(false)
-  
-  // Use $derived for reactive derived state
-  let showCounter = $derived(clickCount > 0)
+  let isVisible = false
+  let clickCount = 0
+  let isAnimating = false
 
   const confettiColors = [
     '#FF3E00', '#FF8A00', '#40B3FF', '#2DD4BF', '#FFD700'
@@ -31,24 +28,18 @@
     }, 3000)
   }
 
-  // Handle keyboard events for accessibility
-  function handleKeyDown(event) {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      fireConfetti()
-    }
+  let showCounter = false
+  $: if (clickCount > 0) {
+    showCounter = true
   }
 </script>
 
 <section class="docs-hero" transition:fly={{ y: 20, duration: 400, delay: 100 }}>
   <div class="hero-content">
     <div class="title-wrapper">
-      <!-- Use button for accessibility instead of h1 with onclick -->
-      <button
-        type="button"
-        class="clickable-title"
+      <h1
+        class="clickable-title {isAnimating ? 'clicked' : ''}"
         onclick={fireConfetti}
-        onkeydown={handleKeyDown}
         aria-label="Click for confetti celebration"
       >
         <span class="brand-gradient">callaback</span>
@@ -57,11 +48,12 @@
           <span
             class="click-counter"
             transition:fade={{ duration: 300 }}
+            onoutroend={() => showCounter = false}
           >
             +{clickCount}
           </span>
         {/if}
-      </button>
+      </h1>
       
       <div class="subtitle text-gray-500 dark:text-gray-400">
         <svg class="sparkle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -88,7 +80,7 @@
             ticks: 300,
             decay: 0.94
           }}
-        ></div>
+        />
       </div>
     {/if}
 
@@ -162,7 +154,7 @@
     position: relative;
   }
 
-  button.clickable-title {
+  h1 {
     font-size: clamp(3rem, 6vw, 4.5rem);
     font-weight: 900;
     letter-spacing: -0.03em;
@@ -174,18 +166,13 @@
     cursor: pointer;
     position: relative;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    background: none;
-    border: none;
-    padding: 0;
-    font-family: inherit;
-    color: inherit;
   }
 
-  button.clickable-title:hover {
+  h1:hover {
     transform: translateY(-2px);
   }
 
-  button.clickable-title.clicked {
+  .clickable-title.clicked {
     animation: pulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
@@ -365,7 +352,7 @@
       padding: 0 1.5rem;
     }
     
-    button.clickable-title {
+    h1 {
       font-size: clamp(2.5rem, 8vw, 3.5rem);
     }
     

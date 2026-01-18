@@ -129,8 +129,11 @@
     "name": "entries/pages/_page.svelte",
     "src": "src/routes/+page.svelte",
     "isEntry": true,
+    "imports": [
+      "_index.js"
+    ],
     "css": [
-      "_app/immutable/assets/_page.CG-Llu_J.css"
+      "_app/immutable/assets/_page.CzWwKSCF.css"
     ]
   },
   "src/routes/about/+page.svelte": {
