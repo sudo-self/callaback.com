@@ -12,18 +12,12 @@
   const socialLinks = [
     { icon: 'twitter', url: 'https://twitter.com/callaback', label: 'Twitter' },
     { icon: 'github', url: 'https://github.com/1900geek', label: 'GitHub' },
-    { icon: 'linkedin', url: 'https://linkedin.com/company/callaback', label: 'LinkedIn' },
-    { icon: 'discord', url: 'https://discord.gg/callaback', label: 'Discord' }
+    { icon: 'linkedin', url: 'https://www.linkedin.com/in/dweipert', label: 'LinkedIn' }
   ];
   
   // Footer navigation links
   const footerLinks = {
-    product: [
-      { name: 'Features', url: '/features' },
-      { name: 'Pricing', url: '/pricing' },
-      { name: 'API', url: '/api' },
-      { name: 'Documentation', url: '/docs' }
-    ],
+  
     company: [
       { name: 'About', url: '/about' },
       { name: 'Todo', url: '/todo' },
@@ -59,11 +53,6 @@
       case 'linkedin':
         return {
           path: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z',
-          viewBox: '0 0 24 24'
-        };
-      case 'discord':
-        return {
-          path: 'M20.317 4.369a19.791 19.791 0 00-4.885-1.515c-.214.385-.459.93-.628 1.347a18.27 18.27 0 00-5.487 0c-.168-.417-.415-.962-.629-1.347a19.736 19.736 0 00-4.885 1.515c-3.026 4.508-3.842 8.912-3.434 13.161a19.814 19.814 0 006.062 3.02c.485-.665.917-1.375 1.282-2.117a12.88 12.88 0 01-2.028-.979c.172-.124.34-.253.5-.387 3.942 1.845 8.203 1.845 12.084 0 .163.134.332.263.5.387-.644.383-1.33.703-2.028.979.365.742.797 1.452 1.282 2.117a19.777 19.777 0 006.062-3.02c.483-4.833-.837-9.187-3.434-13.161zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z',
           viewBox: '0 0 24 24'
         };
       default:
@@ -137,25 +126,6 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Product Links -->
-      <div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          Product
-        </h3>
-        <ul class="space-y-3">
-          {#each footerLinks.product as link}
-            <li>
-              <a
-                href={link.url}
-                class="text-gray-600 hover:text-orange-600 transition-colors duration-200 hover:underline focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-1 rounded px-1"
-              >
-                {link.name}
-              </a>
-            </li>
-          {/each}
-        </ul>
       </div>
 
       <!-- Company Links -->
