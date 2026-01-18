@@ -34,6 +34,7 @@
 		"/android/res/mipmap-xxxhdpi/ic_launcher_background.png",
 		"/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
 		"/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
+		"/api.md",
 		"/apple-touch-icon.png",
 		"/callaback.png",
 		"/favicon.ico",
@@ -70,7 +71,6 @@
 		"/ios/Contents.json",
 		"/manifest.webmanifest",
 		"/og-preview.png",
-		"/platform_api.md",
 		"/robots.txt"
 	]
 }

@@ -13,13 +13,8 @@
   let isMenuOpen = $state(false);
   let isScrolled = $state(false);
   
-  // Track current theme from props
-  let currentTheme = $state(theme);
-
-  // React to theme prop changes
-  $effect(() => {
-    currentTheme = theme;
-  });
+  // Use $derived to reactively track theme changes from props
+  let currentTheme = $derived(theme);
 
   onMount(() => {
     windowWidth = window.innerWidth;
@@ -74,21 +69,17 @@
     }, 150);
   }
 
-  function handleBackdropClick(event: MouseEvent) {
-    if ((event.target as HTMLElement).classList.contains('mobile-backdrop')) {
-      closeMenu();
-    }
-  }
-
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape' && isMenuOpen) {
       closeMenu();
     }
   }
 
-  function handleCloseClick(event: MouseEvent) {
-    event.stopPropagation();
-    closeMenu();
+  // Handle keyboard events for backdrop
+  function handleBackdropKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      closeMenu();
+    }
   }
 </script>
 
@@ -100,7 +91,6 @@
 
 <nav
   class="fixed top-0 left-0 right-0 z-50 px-4 py-3 transition-all duration-300 {isScrolled ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg' : 'bg-gradient-to-r from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700'}"
-  role="navigation"
   aria-label="Main navigation"
 >
   <div class="max-w-7xl mx-auto flex justify-between items-center">
@@ -155,7 +145,7 @@
         </a>
 
         <button
-          on:click={handleThemeToggle}
+          onclick={handleThemeToggle}
           class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
           aria-label={currentTheme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
           type="button"
@@ -175,7 +165,7 @@
 
     <div class="md:hidden flex items-center space-x-4">
       <button
-        on:click={handleThemeToggle}
+        onclick={handleThemeToggle}
         class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
         aria-label={currentTheme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
         type="button"
@@ -193,7 +183,7 @@
 
       <button
         class="relative w-10 h-10 flex flex-col justify-center items-center group focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 rounded-lg"
-        on:click={toggleMenu}
+        onclick={toggleMenu}
         aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMenuOpen}
         type="button"
@@ -212,16 +202,19 @@
 {#if isMenuOpen}
   <div
     class="mobile-backdrop md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-    on:click|self={closeMenu}
+    onclick={(e) => e.target === e.currentTarget && closeMenu()}
+    onkeydown={handleBackdropKeydown}
     transition:fade={{ duration: 200 }}
     role="dialog"
     aria-modal="true"
     aria-label="Mobile navigation menu"
+    tabindex="-1"
   >
     <div
       class="absolute right-0 top-0 h-full w-80 bg-gradient-to-b from-orange-600 to-orange-700 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
-      on:click|stopPropagation
+      onclick={(e) => e.stopPropagation()}
       transition:slide={{ duration: 300, easing: cubicOut }}
+      role="dialog"
     >
       <div class="p-8 h-full flex flex-col">
         <div class="flex items-center justify-between mb-10">
@@ -238,7 +231,7 @@
             </span>
           </div>
           <button
-            on:click={closeMenu}
+            onclick={closeMenu}
             class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
             aria-label="Close menu"
             type="button"
@@ -253,7 +246,7 @@
           <li>
             <a
               href="/about"
-              on:click={handleMobileLinkClick}
+              onclick={handleMobileLinkClick}
               class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/about' ? 'bg-white/20 text-white' : ''}"
               aria-current={$page.url?.pathname === '/about' ? 'page' : undefined}
             >
@@ -266,7 +259,7 @@
           <li>
             <a
               href="/todo"
-              on:click={handleMobileLinkClick}
+              onclick={handleMobileLinkClick}
               class="flex items-center gap-3 text-white/90 hover:text-white text-lg font-medium px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors group {$page.url?.pathname === '/todo' ? 'bg-white/20 text-white' : ''}"
               aria-current={$page.url?.pathname === '/todo' ? 'page' : undefined}
             >
@@ -279,7 +272,7 @@
           
           <li class="mt-6 pt-6 border-t border-white/20">
             <button
-              on:click={handleThemeToggle}
+              onclick={handleThemeToggle}
               class="flex items-center justify-between w-full px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
               aria-label={currentTheme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
               type="button"
@@ -305,7 +298,7 @@
           <li class="mt-4">
             <a
               href="mailto:support@callaback.com"
-              on:click={handleMobileLinkClick}
+              onclick={handleMobileLinkClick}
               class="flex items-center justify-center gap-2 bg-white text-orange-600 hover:bg-orange-50 font-semibold text-lg px-6 py-3.5 rounded-lg transition-all hover:shadow-lg hover:scale-105 active:scale-95"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -332,14 +325,6 @@
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
-  }
-
-  .cubic-out {
-    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-  }
-
-  body.menu-open {
-    overflow: hidden;
   }
 
   * {

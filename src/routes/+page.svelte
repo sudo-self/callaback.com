@@ -2,34 +2,13 @@
   import { confetti } from '@neoconfetti/svelte'
   import { tick } from 'svelte'
   import { fade, fly } from 'svelte/transition'
-  import { onMount } from 'svelte'
 
   let isVisible = $state(false)
   let clickCount = $state(0)
   let isAnimating = $state(false)
   
-  // Add theme awareness
-  let isDarkMode = $state(false)
-  
   // Use $derived for reactive derived state
   let showCounter = $derived(clickCount > 0)
-  
-  onMount(() => {
-    // Check current theme
-    isDarkMode = document.documentElement.classList.contains('dark')
-    
-    // Listen for theme changes
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          isDarkMode = document.documentElement.classList.contains('dark')
-        }
-      })
-    })
-    
-    observer.observe(document.documentElement, { attributes: true })
-    return () => observer.disconnect()
-  })
 
   const confettiColors = [
     '#FF3E00', '#FF8A00', '#40B3FF', '#2DD4BF', '#FFD700'
