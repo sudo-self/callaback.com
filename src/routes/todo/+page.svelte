@@ -20,289 +20,347 @@
         }
     });
 
-    
-    let db = null;
-    const DB_NAME = 'TodoAppDB';
-    const DB_VERSION = 1;
-    const STORE_NAME = 'todos';
-
     // Todo state
     let todos = $state([]);
     let isLoading = $state(true);
+    let error = $state(null);
 
-    // Initialize IndexedDB
-    async function initDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
+    // API base URL - uses relative path since we're in SvelteKit
+    const API_BASE = '/api';
 
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => {
-                db = request.result;
-                resolve(db);
-            };
-
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
-                
-                // Create object store if it doesn't exist
-                if (!db.objectStoreNames.contains(STORE_NAME)) {
-                    const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                    store.createIndex('done', 'done', { unique: false });
-                    store.createIndex('description', 'description', { unique: false });
-                }
-            };
-        });
-    }
-
-    // Load todos from IndexedDB
+    // Load todos from Cloudflare D1 API
     async function loadTodos() {
-        if (!db) await initDB();
-        
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readonly');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.getAll();
-
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => {
-                const todosFromDB = request.result;
-                
-                // If no todos in DB, initialize with default ones
-                if (todosFromDB.length === 0) {
-                    const defaultTodos = [
-                        { id: 1, done: false, description: 'write some docs' },
-                        { id: 2, done: false, description: 'finish cloudflare integration' },
-                        { id: 3, done: true, description: 'add a billing account' },
-                        { id: 4, done: false, description: 'create a svelte page' },
-                        { id: 5, done: false, description: 'create logins' },
-                        { id: 6, done: false, description: 'establish r2 bucket' }
-                    ];
-                    
-                    // Save default todos to DB
-                    saveTodos(defaultTodos).then(() => {
-                        todos = defaultTodos;
-                        resolve(defaultTodos);
-                    });
-                } else {
-                    todos = todosFromDB;
-                    resolve(todosFromDB);
-                }
-            };
-        });
+        try {
+            error = null;
+            const response = await fetch(`${API_BASE}/todos`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to load todos');
+            }
+            
+            todos = result.data || [];
+            
+            // If no todos in DB, initialize with default ones
+            if (todos.length === 0) {
+                await initializeDefaultTodos();
+            }
+        } catch (err) {
+            console.error('Failed to load todos:', err);
+            error = err.message;
+            // Fallback to local state if API fails
+            todos = getDefaultTodos();
+        }
     }
 
-    // Save todos to IndexedDB
-    async function saveTodos(todosToSave) {
-        if (!db) await initDB();
+    // Initialize default todos
+    async function initializeDefaultTodos() {
+        const defaultTodos = getDefaultTodos();
         
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            
-            // Clear existing todos
-            store.clear();
-            
-            // Add all todos
-            todosToSave.forEach(todo => {
-                store.put(todo);
-            });
-
-            transaction.oncomplete = () => resolve();
-            transaction.onerror = () => reject(transaction.error);
-        });
+        try {
+            for (const todo of defaultTodos) {
+                await saveTodo(todo);
+            }
+            todos = defaultTodos;
+        } catch (err) {
+            console.error('Failed to initialize default todos:', err);
+            todos = defaultTodos;
+        }
     }
 
-    // Save a single todo to IndexedDB
+    // Get default todos
+    function getDefaultTodos() {
+        return [
+            { id: 1, done: false, description: 'write some docs' },
+            { id: 2, done: false, description: 'finish cloudflare integration' },
+            { id: 3, done: true, description: 'add a billing account' },
+            { id: 4, done: false, description: 'create a svelte page' },
+            { id: 5, done: false, description: 'create logins' },
+            { id: 6, done: false, description: 'establish r2 bucket' }
+        ];
+    }
+
+    // Save todo to API
     async function saveTodo(todo) {
-        if (!db) await initDB();
-        
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.put(todo);
-
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => resolve();
-        });
-    }
-
-    // Delete a todo from IndexedDB
-    async function deleteTodo(todoId) {
-        if (!db) await initDB();
-        
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.delete(todoId);
-
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => resolve();
-        });
-    }
-
-    // Get next ID from IndexedDB
-    async function getNextId() {
-        if (!db) await initDB();
-        
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction([STORE_NAME], 'readonly');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.getAll();
-
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => {
-                const todos = request.result;
-                if (todos.length === 0) {
-                    resolve(1);
-                } else {
-                    const maxId = Math.max(...todos.map(t => t.id));
-                    resolve(maxId + 1);
-                }
-            };
-        });
-    }
-
-    // Initialize on mount
-    onMount(async () => {
         try {
-            await initDB();
-            await loadTodos();
-            isLoading = false;
-        } catch (error) {
-            console.error('Failed to initialize database:', error);
-            // Fallback to local state if IndexedDB fails
-            todos = [
-                { id: 1, done: false, description: 'write some docs' },
-                { id: 2, done: false, description: 'finish cloudflare integration' },
-                { id: 3, done: true, description: 'add a billing account' },
-                { id: 4, done: false, description: 'create a svelte page' },
-                { id: 5, done: false, description: 'create logins' },
-                { id: 6, done: false, description: 'establish r2 bucket' }
-            ];
-            isLoading = false;
-        }
-    });
-
-
-    $effect(() => {
-        if (!isLoading && db && todos.length > 0) {
-            saveTodos(todos).catch(error => {
-                console.error('Failed to save todos:', error);
+            const method = todo.id ? 'PUT' : 'POST';
+            const url = todo.id ? `${API_BASE}/todos/${todo.id}` : `${API_BASE}/todos`;
+            
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    description: todo.description,
+                    done: todo.done
+                })
             });
-        }
-    });
-
-    async function add(event) {
-        const input = event.target;
-        const nextId = await getNextId();
-        const todo = {
-            id: nextId,
-            done: false,
-            description: input.value.trim(),
-            createdAt: new Date().toISOString()
-        };
-
-        if (!todo.description) return;
-
-        try {
-            await saveTodo(todo);
-            todos = [todo, ...todos];
-            input.value = '';
-        } catch (error) {
-            console.error('Failed to add todo:', error);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to save todo');
+            }
+            
+            return result.data;
+        } catch (err) {
+            console.error('Failed to save todo:', err);
+            throw err;
         }
     }
 
-    async function remove(todo) {
+    // Delete todo from API
+    async function deleteTodo(id) {
         try {
-            await deleteTodo(todo.id);
-            todos = todos.filter((t) => t.id !== todo.id);
-        } catch (error) {
-            console.error('Failed to remove todo:', error);
-        }
-    }
-
-    // Handle todo toggle with immediate DB save
-    async function toggleTodo(todo) {
-        todo.done = !todo.done;
-        todo.updatedAt = new Date().toISOString();
-        
-        try {
-            await saveTodo(todo);
-            // Update the todos array to trigger reactivity
-            todos = [...todos];
-        } catch (error) {
-            console.error('Failed to update todo:', error);
-            // Revert the change if save fails
-            todo.done = !todo.done;
+            const response = await fetch(`${API_BASE}/todos/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to delete todo');
+            }
+            
+            return result;
+        } catch (err) {
+            console.error('Failed to delete todo:', err);
+            throw err;
         }
     }
 
     // Clear all completed todos
-    async function clearCompleted() {
-        const completedTodos = todos.filter(t => t.done);
-        
+    async function clearAllCompleted() {
         try {
-            // Delete all completed todos from DB
-            await Promise.all(completedTodos.map(todo => deleteTodo(todo.id)));
+            const response = await fetch(`${API_BASE}/todos`, {
+                method: 'DELETE'
+            });
             
-            // Update local state
-            todos = todos.filter(t => !t.done);
-        } catch (error) {
-            console.error('Failed to clear completed todos:', error);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to clear completed todos');
+            }
+            
+            todos = result.data || [];
+        } catch (err) {
+            console.error('Failed to clear completed todos:', err);
+            throw err;
         }
     }
 
-    // Export database (for backup)
-    async function exportDB() {
-        const blob = new Blob([JSON.stringify(todos, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `todos-backup-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+    // Initialize on mount
+    onMount(async () => {
+        await loadTodos();
+        isLoading = false;
+    });
+
+    // Add new todo
+    async function add(event) {
+        const input = event.target;
+        const description = input.value.trim();
+        
+        if (!description) return;
+
+        try {
+            error = null;
+            const newTodo = {
+                description,
+                done: false
+            };
+            
+            const savedTodo = await saveTodo(newTodo);
+            todos = [savedTodo, ...todos];
+            input.value = '';
+        } catch (err) {
+            console.error('Failed to add todo:', err);
+            error = err.message;
+        }
     }
 
-    // Import database (from backup)
+    // Remove todo
+    async function remove(todo) {
+        try {
+            error = null;
+            await deleteTodo(todo.id);
+            todos = todos.filter((t) => t.id !== todo.id);
+        } catch (err) {
+            console.error('Failed to remove todo:', err);
+            error = err.message;
+        }
+    }
+
+    // Toggle todo status
+    async function toggleTodo(todo) {
+        try {
+            error = null;
+            const updatedTodo = {
+                ...todo,
+                done: !todo.done
+            };
+            
+            // Use PATCH for toggling done status
+            const response = await fetch(`${API_BASE}/todos/${todo.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ done: updatedTodo.done })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to update todo');
+            }
+            
+            // Update local state with the response
+            todos = todos.map(t => t.id === todo.id ? result.data : t);
+        } catch (err) {
+            console.error('Failed to toggle todo:', err);
+            error = err.message;
+            
+            // Revert the UI change
+            todos = [...todos];
+        }
+    }
+
+    // Clear completed todos
+    async function clearCompleted() {
+        try {
+            error = null;
+            await clearAllCompleted();
+        } catch (err) {
+            console.error('Failed to clear completed todos:', err);
+            error = err.message;
+        }
+    }
+
+    // Export todos
+    async function exportDB() {
+        try {
+            error = null;
+            const response = await fetch(`${API_BASE}/export`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // Get filename from Content-Disposition header or use default
+            const disposition = response.headers.get('Content-Disposition');
+            let filename = `todos-backup-${new Date().toISOString().split('T')[0]}.json`;
+            
+            if (disposition && disposition.includes('filename=')) {
+                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                }
+            }
+            
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Failed to export:', err);
+            error = err.message;
+            alert('Export failed. Please try again.');
+        }
+    }
+
+    // Import todos from file
     async function importDB(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const importedTodos = JSON.parse(e.target.result);
-                
-                // Validate the imported data
-                if (!Array.isArray(importedTodos)) {
-                    throw new Error('Invalid todo data format');
-                }
-
-                // Add IDs if missing
-                const todosWithIds = importedTodos.map((todo, index) => ({
-                    ...todo,
-                    id: todo.id || Date.now() + index,
-                    updatedAt: new Date().toISOString()
-                }));
-
-                // Save to IndexedDB
-                await saveTodos(todosWithIds);
-                todos = todosWithIds;
-                
-                alert('Todos imported successfully!');
-            } catch (error) {
-                console.error('Failed to import todos:', error);
-                alert('Failed to import todos. Please check the file format.');
+        try {
+            error = null;
+            const fileContent = await file.text();
+            const importedData = JSON.parse(fileContent);
+            
+            // Handle different JSON structures
+            const importedTodos = importedData.data || importedData.todos || importedData;
+            
+            if (!Array.isArray(importedTodos)) {
+                throw new Error('Invalid file format. Expected array of todos.');
             }
-        };
-        reader.readAsText(file);
+            
+            // Use the import API endpoint
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('overwrite', 'false'); // Set to 'true' to replace all todos
+            
+            const response = await fetch(`${API_BASE}/import`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Import failed');
+            }
+            
+            // Reload todos from server
+            await loadTodos();
+            
+            alert(`Successfully imported ${result.imported_count || importedTodos.length} todos!`);
+            
+            // Reset file input
+            event.target.value = '';
+        } catch (err) {
+            console.error('Failed to import todos:', err);
+            error = err.message;
+            alert(`Import failed: ${err.message}`);
+        }
+    }
+
+    // Get next available ID (client-side, for fallback)
+    function getNextId() {
+        if (todos.length === 0) return 1;
+        const maxId = Math.max(...todos.map(t => t.id));
+        return maxId + 1;
     }
 </script>
 
 <div class="board">
     {#if isLoading}
-        <div class="loading">Loading todos...</div>
+        <div class="loading">Loading todos from Cloudflare D1...</div>
+    {:else if error}
+        <div class="error">
+            <strong>Error:</strong> {error}
+            <button onclick={() => { error = null; loadTodos(); }} class="retry-btn">
+                Retry
+            </button>
+        </div>
     {/if}
 
     <div class="controls">
@@ -314,15 +372,29 @@
         />
         
         <div class="action-buttons">
-            <button onclick={clearCompleted} class="secondary" disabled={!todos.some(t => t.done) || isLoading}>
+            <button
+                onclick={clearCompleted}
+                class="secondary"
+                disabled={!todos.some(t => t.done) || isLoading}
+            >
                 Clear Completed
             </button>
-            <button onclick={exportDB} class="secondary" disabled={isLoading}>
+            <button
+                onclick={exportDB}
+                class="secondary"
+                disabled={isLoading}
+            >
                 Export
             </button>
             <label class="import-btn secondary" disabled={isLoading}>
                 Import
-                <input type="file" accept=".json" onchange={importDB} style="display: none;" />
+                <input
+                    type="file"
+                    accept=".json"
+                    onchange={importDB}
+                    style="display: none;"
+                    disabled={isLoading}
+                />
             </label>
         </div>
     </div>
@@ -331,7 +403,11 @@
         <div class="left">
             <h2>todo ({todos.filter(t => !t.done).length})</h2>
             {#each todos.filter((t) => !t.done) as todo (todo.id)}
-                <label in:receive={{ key: todo.id }} out:send={{ key: todo.id }} animate:flip>
+                <label
+                    in:receive={{ key: todo.id }}
+                    out:send={{ key: todo.id }}
+                    animate:flip
+                >
                     <input
                         type="checkbox"
                         checked={todo.done}
@@ -349,7 +425,11 @@
         <div class="right">
             <h2>done ({todos.filter(t => t.done).length})</h2>
             {#each todos.filter((t) => t.done) as todo (todo.id)}
-                <label in:receive={{ key: todo.id }} out:send={{ key: todo.id }} animate:flip>
+                <label
+                    in:receive={{ key: todo.id }}
+                    out:send={{ key: todo.id }}
+                    animate:flip
+                >
                     <input
                         type="checkbox"
                         checked={todo.done}
@@ -370,7 +450,7 @@
             Total: {todos.length} |
             Todo: {todos.filter(t => !t.done).length} |
             Done: {todos.filter(t => t.done).length} |
-            <span class="db-status"> {isLoading ? 'Loading...' : 'Saved to IndexedDB'}</span>
+            <span class="db-status"> {isLoading ? 'Loading...' : 'Connected to Cloudflare D1'}</span>
         </small>
     </div>
 </div>
@@ -380,6 +460,34 @@
         text-align: center;
         padding: 2em;
         color: #666;
+        background: #f8f9fa;
+        border-radius: 6px;
+        margin-bottom: 1em;
+    }
+
+    .error {
+        text-align: center;
+        padding: 1em;
+        color: #dc3545;
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 6px;
+        margin-bottom: 1em;
+    }
+
+    .error .retry-btn {
+        margin-left: 1em;
+        padding: 0.25em 0.5em;
+        font-size: 0.8em;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    .error .retry-btn:hover {
+        background: #c82333;
     }
 
     .controls {
@@ -392,11 +500,21 @@
         margin: 0 0 1em 0;
         padding: 0.5em;
         box-sizing: border-box;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        transition: border-color 0.15s ease-in-out;
+    }
+
+    .new-todo:focus {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
 
     .new-todo:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        background: #e9ecef;
     }
 
     .action-buttons {
@@ -412,15 +530,20 @@
         border-radius: 4px;
         cursor: pointer;
         font-size: 0.9em;
+        transition: all 0.2s ease;
     }
 
     button:hover:not(:disabled), .import-btn:hover:not(:disabled) {
         background: #f5f5f5;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     button:disabled, .import-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
     }
 
     .import-btn {
@@ -436,11 +559,13 @@
     .board {
         max-width: 36em;
         margin: 0 auto;
+        padding: 1em;
     }
 
     .columns {
         display: flex;
         gap: 2em;
+        margin-top: 1em;
     }
 
     .left,
@@ -456,12 +581,15 @@
         user-select: none;
         margin-bottom: 1em;
         color: #333;
+        padding-bottom: 0.5em;
+        border-bottom: 2px solid #e9ecef;
     }
 
     label {
         top: 0;
         left: 0;
-        display: block;
+        display: flex;
+        align-items: center;
         font-size: 1em;
         line-height: 1;
         padding: 0.75em;
@@ -483,22 +611,25 @@
     input[type="checkbox"] {
         margin: 0 0.5em 0 0;
         cursor: pointer;
+        width: 1.2em;
+        height: 1.2em;
     }
 
     .description {
         flex: 1;
+        margin: 0 0.5em;
     }
 
     .right label {
-        background-color: rgba(180, 240, 100, 0.2);
+        background-color: rgba(180, 240, 100, 0.15);
         border-color: rgba(180, 240, 100, 0.3);
     }
 
     .right label:hover {
-        background-color: rgba(180, 240, 100, 0.3);
+        background-color: rgba(180, 240, 100, 0.25);
     }
 
-    button {
+    label button {
         float: right;
         height: 1.5em;
         width: 1.5em;
@@ -515,9 +646,10 @@
         align-items: center;
         justify-content: center;
         font-weight: bold;
+        margin: 0;
     }
 
-    button:hover:not(:disabled) {
+    label button:hover:not(:disabled) {
         background-color: rgba(220, 53, 69, 0.1);
         opacity: 1;
     }
@@ -542,6 +674,7 @@
         border-top: 1px solid #dee2e6;
         text-align: center;
         color: #6c757d;
+        font-size: 0.9em;
     }
 
     .db-status {
@@ -567,6 +700,10 @@
         
         button, .import-btn {
             width: 100%;
+        }
+        
+        .board {
+            padding: 0.5em;
         }
     }
 </style>
