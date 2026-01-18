@@ -21,7 +21,12 @@
 
     <div class="centered" out:fly={{ y: -20, duration: 800 }}>
         {#each 'CALLABACK' as char, i}
-            <span in:fade|global={{ delay: 1000 + i * 150, duration: 800 }}>{char}</span>
+            <span 
+                class="letter"
+                in:fade|global={{ delay: 1000 + i * 150, duration: 800 }}
+            >
+                {char}
+            </span>
         {/each}
     </div>
 {/if}
@@ -46,18 +51,57 @@
     }
 
     .centered {
-        font-size: 20vw;
         position: absolute;
         left: 50%;
         top: 50%;
         transform: translate(-50%, -50%);
         font-family: 'Overpass';
-        letter-spacing: 0.12em;
         color: #676778;
         font-weight: 400;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        padding: 0 2rem;
+        box-sizing: border-box;
     }
 
-    .centered span {
+    .letter {
+        font-size: clamp(2rem, 6vw, 4rem);
+        margin: 0 0.08rem;
+        letter-spacing: -0.02em;
+        display: inline-block;
         will-change: filter;
+    }
+
+    /* Ensure first and last letters are fully visible */
+    .centered {
+        left: calc(50% + 0.1rem);
+    }
+
+    @media (max-width: 768px) {
+        .letter {
+            font-size: clamp(1.6rem, 5vw, 3rem);
+            margin: 0 0.05rem;
+            letter-spacing: -0.03em;
+        }
+        
+        .centered {
+            padding: 0 1.5rem;
+            left: calc(50% + 0.05rem);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .letter {
+            font-size: clamp(1.2rem, 4vw, 2.2rem);
+            margin: 0 0.03rem;
+            letter-spacing: -0.04em;
+        }
+        
+        .centered {
+            padding: 0 1rem;
+            left: calc(50% + 0.03rem);
+        }
     }
 </style>
