@@ -17,7 +17,6 @@
   
   // Footer navigation links
   const footerLinks = {
-  
     company: [
       { name: 'About', url: '/about' },
       { name: 'Todo', url: '/todo' },
@@ -70,8 +69,9 @@
   aria-label="Site footer"
 >
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
-      <!-- Brand Column -->
+    <!-- Main Footer Content - Centered 4-column layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+      <!-- Brand Column - Full width on mobile, 2 columns on desktop -->
       <div class="lg:col-span-2">
         <div class="flex flex-col space-y-4">
           <div class="flex items-center gap-3">
@@ -169,16 +169,17 @@
 
     <!-- Divider -->
     <div class="mt-12 pt-8 border-t border-gray-300">
-      <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-        <!-- Copyright -->
-        <div class="text-center md:text-left">
+      <!-- Centered copyright and legal links -->
+      <div class="flex flex-col items-center space-y-6">
+        <!-- Copyright - Centered -->
+        <div class="text-center">
           <p class="text-gray-600 text-sm">
-        &copy; {currentYear} Invariant Ego, LLC. All rights reserved.
+            &copy; {currentYear} Invariant Ego, LLC. All rights reserved.
           </p>
         </div>
 
-        <!-- Legal Links -->
-        <div class="flex flex-wrap justify-center gap-4 md:gap-6">
+        <!-- Legal Links - Centered with consistent spacing -->
+        <div class="flex flex-wrap justify-center gap-6">
           {#each footerLinks.legal as link}
             <a
               href={link.url}
@@ -188,34 +189,34 @@
             </a>
           {/each}
         </div>
-      </div>
 
-      <!-- Trust badges / Additional info -->
-      <div class="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center space-x-4">
-          <div class="flex items-center space-x-2 text-sm text-gray-500">
-            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <span>Certificate of Fact of Good Standing</span>
+        <!-- Trust badges and language selector - Centered stack -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 w-full max-w-3xl">
+          <!-- Trust badges - Centered -->
+          <div class="flex items-center justify-center space-x-4">
+            <div class="flex items-center space-x-2 text-sm text-gray-500">
+              <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <span>Certificate of Fact of Good Standing</span>
+            </div>
           </div>
-         
-        </div>
-        
-        <!-- Language / Region Selector -->
-        <div class="flex items-center space-x-2">
-          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <select
-            class="bg-transparent text-sm text-gray-600 border-none focus:outline-none focus:ring-0 cursor-pointer"
-            aria-label="Select language"
-          >
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="de">Deutsch</option>
-          </select>
+          
+          <!-- Language Selector - Centered -->
+          <div class="flex items-center justify-center space-x-2">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <select
+              class="bg-transparent text-sm text-gray-600 border-none focus:outline-none focus:ring-0 cursor-pointer"
+              aria-label="Select language"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </div>
         </div>
       </div>
     </div>
@@ -237,5 +238,30 @@
   :focus-visible {
     outline: 2px solid #f97316;
     outline-offset: 2px;
+  }
+  
+  /* Ensure proper centering */
+  .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Responsive grid adjustments */
+  @media (max-width: 1024px) {
+    .grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .lg\\:col-span-2 {
+      grid-column: span 2;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .grid-cols-2 {
+      grid-template-columns: 1fr;
+    }
+    .lg\\:col-span-2 {
+      grid-column: span 1;
+    }
   }
 </style>

@@ -65,7 +65,7 @@
           <path d="M12 2L14.5 8.5L21 12L14.5 15.5L12 22L9.5 15.5L3 12L9.5 8.5L12 2Z"
                 fill="currentColor" stroke="currentColor" stroke-width="1"/>
         </svg>
-        <span>Click the text above to celebrate!</span>
+        <span>tap the domain name to celebrate!</span>
       </div>
     </div>
 
@@ -122,12 +122,12 @@
       <div class="cta-section" transition:fade={{ delay: 600 }}>
         <p class="links">
           <a
-            href="https://github.com/sveltejs/kit"
+            href="https://svelte.dev"
             target="_blank"
             rel="noopener noreferrer"
             class="cta-link"
           >
-            <span class="cta-text">Get started with SvelteKit</span>
+            <span class="cta-text">build with Svelte</span>
             <svg class="arrow-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M5 12H19M19 12L12 5M19 12L12 19"
                     stroke="currentColor"

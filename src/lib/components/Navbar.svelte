@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import { onMount } from 'svelte';
   import { fade, slide } from 'svelte/transition';
   import { page } from '$app/stores';
@@ -42,12 +41,41 @@
     isScrolled = window.scrollY > 10;
   }
 
-  function handleMobileLinkClick() {
+  // Handle link clicks - close menu and navigate
+  function handleMobileLinkClick(event: MouseEvent) {
+    event.preventDefault();
+    const target = event.currentTarget as HTMLAnchorElement;
+    const href = target.getAttribute('href');
+    
     closeMenu();
+    
+    // Small delay to allow menu to close before navigation
+    setTimeout(() => {
+      if (href && href.startsWith('/')) {
+        window.location.href = href;
+      } else if (href && href.startsWith('mailto:')) {
+        window.location.href = href;
+      }
+    }, 150);
   }
 
-  function handleCloseClick(e: MouseEvent) {
-    e.stopPropagation();
+  // Close menu when clicking the backdrop (outside)
+  function handleBackdropClick(event: MouseEvent) {
+    if ((event.target as HTMLElement).classList.contains('mobile-backdrop')) {
+      closeMenu();
+    }
+  }
+
+  // Close menu with Escape key
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && isMenuOpen) {
+      closeMenu();
+    }
+  }
+
+  // Handle close button click
+  function handleCloseClick(event: MouseEvent) {
+    event.stopPropagation();
     closeMenu();
   }
 </script>
@@ -55,6 +83,7 @@
 <svelte:window
   onresize={handleResize}
   onscroll={handleScroll}
+  on:keydown={handleKeydown}
 />
 
 <nav
@@ -127,6 +156,7 @@
       onclick={toggleMenu}
       aria-label={isMenuOpen ? "Close menu" : "Open menu"}
       aria-expanded={isMenuOpen}
+      type="button"
     >
       <span class="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
       <div class="space-y-1.5">
@@ -138,14 +168,15 @@
   </div>
 </nav>
 
-
+<!-- Mobile Menu -->
 {#if isMenuOpen}
   <div
-    class="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-    onclick={closeMenu}
+    class="mobile-backdrop md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+    onclick={handleBackdropClick}
     transition:fade={{ duration: 200 }}
     role="dialog"
     aria-modal="true"
+    aria-label="Mobile navigation menu"
   >
     <div
       class="absolute right-0 top-0 h-full w-80 bg-gradient-to-b from-orange-600 to-orange-700 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
@@ -171,6 +202,7 @@
             onclick={handleCloseClick}
             class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
             aria-label="Close menu"
+            type="button"
           >
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -233,7 +265,6 @@
           </li>
         </ul>
 
-     
         <div class="pt-6 mt-6 border-t border-white/20">
           <p class="text-white/70 text-sm">
             Everything you need to build, integrate, and scale with Callaback.
@@ -244,6 +275,7 @@
   </div>
 {/if}
 
+<!-- Spacer to account for fixed navbar -->
 <div class="h-16 md:h-20"></div>
 
 <style>
@@ -255,5 +287,10 @@
 
   .cubic-out {
     animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+
+  /* Prevent scrolling when menu is open */
+  body.menu-open {
+    overflow: hidden;
   }
 </style>
