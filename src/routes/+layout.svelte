@@ -3,34 +3,92 @@
     import './app.css';
     import Navbar from '$lib/components/Navbar.svelte';
     import Footer from '$lib/components/Footer.svelte';
+    import { browser } from '$app/environment';
 
     const { children } = $props();
 
     // Dark mode state management
-    let theme = 'light';
+    let theme = $state('light');
     let isInitialized = $state(false);
 
     onMount(() => {
         // Check for saved theme preference or system preference
-        const saved = localStorage.getItem('theme');
-        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const saved = browser ? localStorage.getItem('theme') : null;
+        const systemDark = browser ? window.matchMedia('(prefers-color-scheme: dark)').matches : false;
         
         theme = saved || (systemDark ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
+        
+        if (browser) {
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+        
         isInitialized = true;
     });
 
     function toggleTheme() {
         theme = theme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
+        
+        if (browser) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+        }
     }
 </script>
 
-<!-- Theme toggle button (optional, can be placed in Navbar instead) -->
+<svelte:head>
+    <!-- SEO -->
+    <title>Callaback.com – Modern Callback Solution</title>
+    <meta
+        name="description"
+        content="Callaback is a modern callback solution that transforms customer communication and support."
+    />
+    <meta name="keywords" content="callback, customer service, communication, support" />
+    <meta name="author" content="Callaback" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://callaback.com/" />
+
+    <!-- Icons -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Callaback – Modern Callback Solution" />
+    <meta
+        property="og:description"
+        content="Transform your customer communication with seamless callback technology."
+    />
+    <meta property="og:url" content="https://callaback.com/" />
+    <meta property="og:image" content="https://callaback.com/og-preview.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Callaback – Modern Callback Solution" />
+    <meta
+        name="twitter:description"
+        content="Transform your customer communication with seamless callback technology."
+    />
+    <meta name="twitter:image" content="https://callaback.com/og-preview.png" />
+
+    <!-- PWA / iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Callaback" />
+    
+    <!-- Viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</svelte:head>
+
+<!-- Theme toggle button -->
 {#if isInitialized}
     <button
-        onclick={toggleTheme}
+        on:click={toggleTheme}
         class="fixed bottom-6 right-6 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 z-50 group"
         aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
         title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
@@ -59,7 +117,7 @@
 
 <style>
     /* Smooth theme transitions */
-    * {
+    :global(*) {
         transition: background-color 0.3s ease, border-color 0.3s ease;
     }
     
