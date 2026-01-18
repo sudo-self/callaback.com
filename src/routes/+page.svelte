@@ -2,10 +2,34 @@
   import { confetti } from '@neoconfetti/svelte'
   import { tick } from 'svelte'
   import { fade, fly } from 'svelte/transition'
+  import { onMount } from 'svelte'
 
-  let isVisible = false
-  let clickCount = 0
-  let isAnimating = false
+  let isVisible = $state(false)
+  let clickCount = $state(0)
+  let isAnimating = $state(false)
+  
+  // Add theme awareness
+  let isDarkMode = $state(false)
+  
+  // Use $derived for reactive derived state
+  let showCounter = $derived(clickCount > 0)
+  
+  onMount(() => {
+    // Check current theme
+    isDarkMode = document.documentElement.classList.contains('dark')
+    
+    // Listen for theme changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          isDarkMode = document.documentElement.classList.contains('dark')
+        }
+      })
+    })
+    
+    observer.observe(document.documentElement, { attributes: true })
+    return () => observer.disconnect()
+  })
 
   const confettiColors = [
     '#FF3E00', '#FF8A00', '#40B3FF', '#2DD4BF', '#FFD700'
@@ -28,19 +52,24 @@
     }, 3000)
   }
 
-  let showCounter = false
-  $: if (clickCount > 0) {
-    showCounter = true
+  // Handle keyboard events for accessibility
+  function handleKeyDown(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      fireConfetti()
+    }
   }
 </script>
 
 <section class="docs-hero" transition:fly={{ y: 20, duration: 400, delay: 100 }}>
   <div class="hero-content">
     <div class="title-wrapper">
-      <h1
+      <!-- Use button for accessibility instead of h1 with onclick -->
+      <button
+        type="button"
         class="clickable-title"
         onclick={fireConfetti}
-        class:clicked={isAnimating}
+        onkeydown={handleKeyDown}
         aria-label="Click for confetti celebration"
       >
         <span class="brand-gradient">callaback</span>
@@ -49,12 +78,11 @@
           <span
             class="click-counter"
             transition:fade={{ duration: 300 }}
-            onoutroend={() => showCounter = false}
           >
             +{clickCount}
           </span>
         {/if}
-      </h1>
+      </button>
       
       <div class="subtitle text-gray-500 dark:text-gray-400">
         <svg class="sparkle-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -81,7 +109,7 @@
             ticks: 300,
             decay: 0.94
           }}
-        />
+        ></div>
       </div>
     {/if}
 
@@ -155,7 +183,7 @@
     position: relative;
   }
 
-  h1 {
+  button.clickable-title {
     font-size: clamp(3rem, 6vw, 4.5rem);
     font-weight: 900;
     letter-spacing: -0.03em;
@@ -167,13 +195,18 @@
     cursor: pointer;
     position: relative;
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    color: inherit;
   }
 
-  h1:hover {
+  button.clickable-title:hover {
     transform: translateY(-2px);
   }
 
-  h1.clicked {
+  button.clickable-title.clicked {
     animation: pulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
@@ -353,7 +386,7 @@
       padding: 0 1.5rem;
     }
     
-    h1 {
+    button.clickable-title {
       font-size: clamp(2.5rem, 8vw, 3.5rem);
     }
     

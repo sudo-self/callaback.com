@@ -32,7 +32,6 @@
 {/if}
 
 <link href="https://fonts.googleapis.com/css?family=Overpass:100,400" rel="stylesheet" />
-
 <style>
     svg {
         width: 100%;
@@ -44,11 +43,12 @@
         opacity: 1;
     }
 
-    label {
+    /* Remove this unused label selector */
+    /* label {
         position: absolute;
         top: 1em;
         left: 1em;
-    }
+    } */
 
     .centered {
         position: absolute;

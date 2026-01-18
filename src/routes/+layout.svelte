@@ -7,7 +7,7 @@
 
     const { children } = $props();
 
-    // Dark mode state management
+
     let theme = $state('light');
     let isInitialized = $state(false);
 
@@ -19,17 +19,18 @@
         theme = saved || (systemDark ? 'dark' : 'light');
         
         if (browser) {
-            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.toggle('dark', theme === 'dark');
         }
         
         isInitialized = true;
     });
 
+    // Theme toggle function that Navbar can call
     function toggleTheme() {
         theme = theme === 'light' ? 'dark' : 'light';
         
         if (browser) {
-            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.toggle('dark', theme === 'dark');
             localStorage.setItem('theme', theme);
         }
     }
@@ -86,8 +87,8 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <!-- Pass theme and toggleTheme to Navbar -->
-    <Navbar {theme} {toggleTheme} />
+    <!-- Pass theme state and toggle function to Navbar -->
+    <Navbar theme={theme} onToggleTheme={toggleTheme} />
     
     <main class="flex-1">
         {@render children()}

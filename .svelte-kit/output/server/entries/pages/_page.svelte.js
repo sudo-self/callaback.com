@@ -1,12 +1,10 @@
-import { _ as attr_class } from "../../chunks/index.js";
 function _page($$renderer, $$props) {
   $$renderer.component(($$renderer2) => {
-    let isAnimating = false;
-    $$renderer2.push(`<section class="docs-hero svelte-1uha8ag"><div class="hero-content svelte-1uha8ag"><div class="title-wrapper svelte-1uha8ag"><h1${attr_class("clickable-title svelte-1uha8ag", void 0, { "clicked": isAnimating })} aria-label="Click for confetti celebration"><span class="brand-gradient svelte-1uha8ag">callaback</span> <span class="domain text-gray-700 dark:text-gray-300 svelte-1uha8ag">.com</span> `);
+    $$renderer2.push(`<section class="docs-hero svelte-1uha8ag"><div class="hero-content svelte-1uha8ag"><div class="title-wrapper svelte-1uha8ag"><button type="button" class="clickable-title svelte-1uha8ag" aria-label="Click for confetti celebration"><span class="brand-gradient svelte-1uha8ag">callaback</span> <span class="domain text-gray-700 dark:text-gray-300 svelte-1uha8ag">.com</span> `);
     {
       $$renderer2.push("<!--[!-->");
     }
-    $$renderer2.push(`<!--]--></h1> <div class="subtitle text-gray-500 dark:text-gray-400 svelte-1uha8ag"><svg class="sparkle-icon svelte-1uha8ag" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.5 8.5L21 12L14.5 15.5L12 22L9.5 15.5L3 12L9.5 8.5L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="1" class="svelte-1uha8ag"></path></svg> <span class="svelte-1uha8ag">tap the domain name to celebrate!</span></div></div> `);
+    $$renderer2.push(`<!--]--></button> <div class="subtitle text-gray-500 dark:text-gray-400 svelte-1uha8ag"><svg class="sparkle-icon svelte-1uha8ag" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.5 8.5L21 12L14.5 15.5L12 22L9.5 15.5L3 12L9.5 8.5L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="1" class="svelte-1uha8ag"></path></svg> <span class="svelte-1uha8ag">tap the domain name to celebrate!</span></div></div> `);
     {
       $$renderer2.push("<!--[!-->");
     }
