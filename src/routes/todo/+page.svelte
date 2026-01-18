@@ -25,7 +25,7 @@
     let isLoading = $state(true);
     let error = $state(null);
 
-    // API base URL - uses relative path since we're in SvelteKit
+    // API base URL
     const API_BASE = '/api';
 
     // Load todos from Cloudflare D1 API
@@ -254,95 +254,6 @@
         }
     }
 
-    // Export todos
-    async function exportDB() {
-        try {
-            error = null;
-            const response = await fetch(`${API_BASE}/export`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            
-            // Get filename from Content-Disposition header or use default
-            const disposition = response.headers.get('Content-Disposition');
-            let filename = `todos-backup-${new Date().toISOString().split('T')[0]}.json`;
-            
-            if (disposition && disposition.includes('filename=')) {
-                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-                if (matches != null && matches[1]) {
-                    filename = matches[1].replace(/['"]/g, '');
-                }
-            }
-            
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error('Failed to export:', err);
-            error = err.message;
-            alert('Export failed. Please try again.');
-        }
-    }
-
-    // Import todos from file
-    async function importDB(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        try {
-            error = null;
-            const fileContent = await file.text();
-            const importedData = JSON.parse(fileContent);
-            
-            // Handle different JSON structures
-            const importedTodos = importedData.data || importedData.todos || importedData;
-            
-            if (!Array.isArray(importedTodos)) {
-                throw new Error('Invalid file format. Expected array of todos.');
-            }
-            
-            // Use the import API endpoint
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('overwrite', 'false'); // Set to 'true' to replace all todos
-            
-            const response = await fetch(`${API_BASE}/import`, {
-                method: 'POST',
-                body: formData
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const result = await response.json();
-            
-            if (!result.success) {
-                throw new Error(result.error || 'Import failed');
-            }
-            
-            // Reload todos from server
-            await loadTodos();
-            
-            alert(`Successfully imported ${result.imported_count || importedTodos.length} todos!`);
-            
-            // Reset file input
-            event.target.value = '';
-        } catch (err) {
-            console.error('Failed to import todos:', err);
-            error = err.message;
-            alert(`Import failed: ${err.message}`);
-        }
-    }
-
     // Get next available ID (client-side, for fallback)
     function getNextId() {
         if (todos.length === 0) return 1;
@@ -379,23 +290,6 @@
             >
                 Clear Completed
             </button>
-            <button
-                onclick={exportDB}
-                class="secondary"
-                disabled={isLoading}
-            >
-                Export
-            </button>
-            <label class="import-btn secondary" disabled={isLoading}>
-                Import
-                <input
-                    type="file"
-                    accept=".json"
-                    onchange={importDB}
-                    style="display: none;"
-                    disabled={isLoading}
-                />
-            </label>
         </div>
     </div>
 
@@ -523,7 +417,7 @@
         flex-wrap: wrap;
     }
 
-    button, .import-btn {
+    button {
         padding: 0.5em 1em;
         border: 1px solid #ccc;
         background: white;
@@ -533,22 +427,17 @@
         transition: all 0.2s ease;
     }
 
-    button:hover:not(:disabled), .import-btn:hover:not(:disabled) {
+    button:hover:not(:disabled) {
         background: #f5f5f5;
         transform: translateY(-1px);
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    button:disabled, .import-btn:disabled {
+    button:disabled {
         opacity: 0.5;
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
-    }
-
-    .import-btn {
-        display: inline-block;
-        text-align: center;
     }
 
     .secondary {
@@ -698,7 +587,7 @@
             flex-direction: column;
         }
         
-        button, .import-btn {
+        button {
             width: 100%;
         }
         
