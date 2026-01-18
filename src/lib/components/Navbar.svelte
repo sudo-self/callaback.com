@@ -3,20 +3,14 @@
   import { fade, slide } from 'svelte/transition';
   import { page } from '$app/stores';
   import { cubicOut } from 'svelte/easing';
+  import { themeStore } from '$lib/stores/theme.svelte.js';
 
   let windowWidth;
   let isMenuOpen = $state(false);
   let isScrolled = $state(false);
-  let darkMode = $state(false);
 
   onMount(() => {
     windowWidth = window.innerWidth;
-    
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      darkMode = true;
-      document.documentElement.classList.add('dark');
-    }
     
     const handleScroll = () => {
       isScrolled = window.scrollY > 10;
@@ -48,14 +42,7 @@
   }
 
   function toggleTheme() {
-    darkMode = !darkMode;
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
+    themeStore.toggle();
   }
 
   function handleMobileLinkClick(event) {
@@ -145,10 +132,10 @@
         <button
           onclick={toggleTheme}
           class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+          aria-label={themeStore.current === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
           type="button"
         >
-          {#if darkMode}
+          {#if themeStore.current === 'dark'}
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
@@ -165,10 +152,10 @@
       <button
         onclick={toggleTheme}
         class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        aria-label={themeStore.current === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
         type="button"
       >
-        {#if darkMode}
+        {#if themeStore.current === 'dark'}
           <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
@@ -272,23 +259,23 @@
                 closeMenu();
               }}
               class="flex items-center justify-between w-full px-4 py-3.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={themeStore.current === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
               type="button"
             >
               <div class="flex items-center gap-3">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  {#if darkMode}
+                  {#if themeStore.current === 'dark'}
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                   {:else}
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                   {/if}
                 </svg>
                 <span class="text-lg font-medium text-white">
-                  {darkMode ? 'Light Mode' : 'Dark Mode'}
+                  {themeStore.current === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </span>
               </div>
               <span class="text-white/70 text-sm">
-                {darkMode ? 'Switch to light' : 'Switch to dark'}
+                {themeStore.current === 'dark' ? 'Switch to light' : 'Switch to dark'}
               </span>
             </button>
           </li>

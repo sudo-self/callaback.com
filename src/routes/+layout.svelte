@@ -1,47 +1,10 @@
 <script>
-    import { onMount } from 'svelte';
     import './app.css';
     import Navbar from '$lib/components/Navbar.svelte';
     import Footer from '$lib/components/Footer.svelte';
-    import { browser } from '$app/environment';
+    import { themeStore } from '$lib/stores/theme.svelte.js';
 
     const { children } = $props();
-
-    // Theme state - use $state for reactivity
-    let theme = $state('light');
-    
-    onMount(() => {
-        if (!browser) return;
-        
-        // Check for saved theme preference or system preference
-        const saved = localStorage.getItem('theme');
-        const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        const initialTheme = saved || (systemDark ? 'dark' : 'light');
-        theme = initialTheme;
-        
-        // Apply theme immediately
-        applyTheme(initialTheme);
-    });
-
-    // Function to apply theme to DOM
-    function applyTheme(newTheme) {
-        if (!browser) return;
-        
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        localStorage.setItem('theme', newTheme);
-    }
-
-    // Theme toggle function
-    function toggleTheme() {
-        const newTheme = theme === 'light' ? 'dark' : 'light';
-        theme = newTheme;
-        applyTheme(newTheme);
-    }
 </script>
 
 <svelte:head>
@@ -95,8 +58,7 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <!-- Pass theme state and toggle function to Navbar -->
-    <Navbar theme={theme} onToggleTheme={toggleTheme} />
+    <Navbar />
     
     <main class="flex-1">
         {@render children()}

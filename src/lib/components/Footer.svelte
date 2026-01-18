@@ -10,7 +10,7 @@
   
   // Social media links
   const socialLinks = [
-    { icon: 'twitter', url: 'https://twitter.com/callaback', label: 'Twitter' },
+    { icon: 'twitter', url: 'https://twitter.com/lightfighter719', label: 'Twitter' },
     { icon: 'github', url: 'https://github.com/1900geek', label: 'GitHub' },
     { icon: 'linkedin', url: 'https://www.linkedin.com/in/dweipert', label: 'LinkedIn' }
   ];
