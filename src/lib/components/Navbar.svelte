@@ -92,8 +92,8 @@
 </script>
 
 <svelte:window
-  onresize={handleResize}
-  onscroll={handleScroll}
+  on:resize={handleResize}
+  on:scroll={handleScroll}
   on:keydown={handleKeydown}
 />
 
@@ -155,29 +155,19 @@
 
         <button
           on:click={toggleTheme}
-          class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+          class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
           aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           type="button"
         >
-          <svg
-            class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-          
-          <svg
-            class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-          </svg>
+          {#if darkMode}
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          {:else}
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          {/if}
         </button>
       </div>
     </div>
@@ -185,29 +175,19 @@
     <div class="md:hidden flex items-center space-x-4">
       <button
         on:click={toggleTheme}
-        class="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+        class="w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
         aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         type="button"
       >
-        <svg
-          class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-        
-        <svg
-          class="w-5 h-5 text-white transition-all duration-300 absolute {darkMode ? 'opacity-100 rotate-0' : 'opacity-0 -rotate-90'}"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
+        {#if darkMode}
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        {:else}
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        {/if}
       </button>
 
       <button
@@ -231,7 +211,7 @@
 {#if isMenuOpen}
   <div
     class="mobile-backdrop md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-    on:click={handleBackdropClick}
+    on:click|self={closeMenu}
     transition:fade={{ duration: 200 }}
     role="dialog"
     aria-modal="true"
@@ -239,7 +219,7 @@
   >
     <div
       class="absolute right-0 top-0 h-full w-80 bg-gradient-to-b from-orange-600 to-orange-700 dark:from-gray-900 dark:to-gray-800 shadow-2xl"
-      on:click={(e) => e.stopPropagation()}
+      on:click|stopPropagation
       transition:slide={{ duration: 300, easing: cubicOut }}
     >
       <div class="p-8 h-full flex flex-col">
@@ -257,7 +237,7 @@
             </span>
           </div>
           <button
-            on:click={handleCloseClick}
+            on:click={closeMenu}
             class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
             aria-label="Close menu"
             type="button"
@@ -309,9 +289,9 @@
               <div class="flex items-center gap-3">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {#if darkMode}
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  {:else}
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  {:else}
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                   {/if}
                 </svg>
                 <span class="text-lg font-medium text-white">
