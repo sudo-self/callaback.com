@@ -1,26 +1,42 @@
 <script>
   import { fly } from 'svelte/transition';
   import { theme } from '$lib/stores/theme';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
 
   let messages = [];
   let input = '';
   let loading = false;
   let bottom;
 
+  // Twilio Sync state
+  let sessionId = 'session123';
+  let identity = '';
+  let isLoggedIn = false;
+  let syncClient = null;
+  let syncList = null;
+
   // Typing animation state
   let typingDots = '';
   let typingInterval;
 
-  // Initial message
   onMount(() => {
-    messages = [
-      { role: 'assistant', content: '📞 Hi! I’m callaback AI. Ask me anything.' }
-    ];
+    // Check for identity in query string
+    const params = new URLSearchParams(window.location.search);
+    const queryIdentity = params.get('identity');
+    if (queryIdentity) {
+      identity = queryIdentity;
+    }
 
     // Set page theme class
     if ($theme === 'dark') document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
+  });
+
+  onDestroy(() => {
+    clearInterval(typingInterval);
+    if (syncClient) {
+      syncClient.shutdown();
+    }
   });
 
   // Scroll to bottom
@@ -40,77 +56,186 @@
     }
   }
 
+  async function login() {
+    if (!identity.trim() || !sessionId.trim()) return;
+
+    loading = true;
+
+    try {
+      // Get Twilio Sync token from your backend
+      // Replace this URL with your actual token endpoint
+      const tokenResponse = await fetch('/api/twilio-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identity, sessionId })
+      });
+
+      if (!tokenResponse.ok) throw new Error('Failed to get token');
+
+      const { token } = await tokenResponse.json();
+
+      // Initialize Twilio Sync Client
+      // You'll need to include the Twilio Sync SDK in your project
+      // Add this to your app.html: https://media.twiliocdn.com/sdk/js/sync/v4/twilio-sync.min.js
+      syncClient = new Twilio.Sync.Client(token);
+
+      // Open or create a Sync List for messages
+      syncList = await syncClient.list(`chat-${sessionId}`);
+
+      // Load existing messages
+      const page = await syncList.getItems();
+      messages = page.items.map(item => ({
+        role: item.data.identity === identity ? 'user' : 'assistant',
+        content: item.data.message,
+        identity: item.data.identity,
+        timestamp: item.dateCreated
+      }));
+
+      // Listen for new messages
+      syncList.on('itemAdded', (event) => {
+        const newMessage = {
+          role: event.item.data.identity === identity ? 'user' : 'assistant',
+          content: event.item.data.message,
+          identity: event.item.data.identity,
+          timestamp: event.item.dateCreated
+        };
+        messages = [...messages, newMessage];
+      });
+
+      isLoggedIn = true;
+
+      // Add welcome message
+      messages = [
+        ...messages,
+        {
+          role: 'assistant',
+          content: `📞 ${identity} joined the chat!`,
+          identity: 'system'
+        }
+      ];
+
+    } catch (err) {
+      console.error('Twilio Sync error:', err);
+      alert('Failed to connect to chat. Please try again.');
+    } finally {
+      loading = false;
+    }
+  }
+
+  function logout() {
+    if (syncClient) {
+      syncClient.shutdown();
+    }
+    isLoggedIn = false;
+    messages = [];
+    syncClient = null;
+    syncList = null;
+  }
+
   async function sendMessage() {
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || !syncList) return;
 
     const userMessage = input;
     input = '';
-    loading = true;
-
-    messages = [...messages, { role: 'user', content: userMessage }];
 
     try {
-      const res = await fetch('https://llm.callaback.com', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage })
+      // Add message to Sync List
+      await syncList.push({
+        identity: identity,
+        message: userMessage,
+        timestamp: new Date().toISOString()
       });
 
-      if (!res.ok) throw new Error('Worker error: ' + res.status);
-
-      const data = await res.json();
-
-      const reply = data?.response?.response || 'No response from AI.';
-
-      messages = [...messages, { role: 'assistant', content: reply }];
     } catch (err) {
-      console.error('AI fetch error:', err);
+      console.error('Error sending message:', err);
       messages = [...messages, {
         role: 'assistant',
-        content: '⚠️ Something went wrong talking to the AI.'
+        content: '⚠️ Failed to send message.'
       }];
-    } finally {
-      loading = false;
     }
   }
 </script>
 
 <section class="chat-page" class:dark={$theme === 'dark'}>
   <header class="chat-header">
-    <h1><span class="brand-gradient">llm.callaback</span></h1>
-    <p class="subtitle">Talk to the Callaback assistant</p>
+    <h1><span class="brand-gradient">Twilio Sync Chat</span></h1>
+    <p class="subtitle">Real-time collaborative chat powered by Twilio</p>
+    {#if isLoggedIn}
+      <button class="logout-btn" on:click={logout}>Logout</button>
+    {/if}
   </header>
 
-  <div class="chat-shell">
-    <div class="chat-messages">
-      {#each messages as msg}
-        <div
-          class="message {msg.role}"
-          in:fly={{ y: 8, opacity: 0, duration: 180 }}
-        >
-          {msg.content}
-        </div>
-      {/each}
+  {#if !isLoggedIn}
+    <!-- Login Form -->
+    <div class="login-container">
+      <div class="login-card">
+        <h3>Session ID</h3>
+        <p class="card-subtitle">Provide a unique session ID for the chat room</p>
+        <input
+          type="text"
+          placeholder="Session ID"
+          bind:value={sessionId}
+          class="login-input"
+        />
+      </div>
 
-      {#if loading}
-        <div class="message assistant typing">
-          Thinking{typingDots}
+      <div class="login-card">
+        <h3>Identity</h3>
+        <p class="card-subtitle">Enter your username to join the chat</p>
+        <div class="login-input-group">
+          <input
+            type="text"
+            placeholder="Username"
+            bind:value={identity}
+            class="login-input"
+            on:keydown={(e) => e.key === 'Enter' && login()}
+          />
+          <button
+            class="login-button"
+            on:click={login}
+            disabled={!identity.trim() || !sessionId.trim() || loading}
+          >
+            {loading ? 'Connecting...' : 'Join Chat'}
+          </button>
         </div>
-      {/if}
-
-      <div bind:this={bottom}></div>
+      </div>
     </div>
+  {:else}
+    <!-- Chat Interface -->
+    <div class="chat-shell">
+      <div class="chat-messages">
+        {#each messages as msg}
+          <div
+            class="message {msg.role}"
+            in:fly={{ y: 8, opacity: 0, duration: 180 }}
+          >
+            {#if msg.identity && msg.identity !== identity && msg.identity !== 'system'}
+              <span class="message-author">{msg.identity}</span>
+            {/if}
+            {msg.content}
+          </div>
+        {/each}
 
-    <form class="chat-input" on:submit|preventDefault={sendMessage}>
-      <input
-        placeholder="Ask something…"
-        bind:value={input}
-        disabled={loading}
-        autocomplete="off"
-      />
-      <button disabled={loading || !input.trim()}>Send</button>
-    </form>
-  </div>
+        {#if loading}
+          <div class="message assistant typing">
+            Connecting{typingDots}
+          </div>
+        {/if}
+
+        <div bind:this={bottom}></div>
+      </div>
+
+      <form class="chat-input" on:submit|preventDefault={sendMessage}>
+        <input
+          placeholder="Type a message…"
+          bind:value={input}
+          disabled={loading}
+          autocomplete="off"
+        />
+        <button disabled={loading || !input.trim()}>Send</button>
+      </form>
+    </div>
+  {/if}
 </section>
 
 <style>
@@ -128,6 +253,7 @@
 
   .chat-header {
     margin-bottom: 3rem;
+    position: relative;
   }
   h1 {
     font-size: clamp(2.75rem, 6vw, 3.75rem);
@@ -151,6 +277,105 @@
     color: #d1d5db;
   }
 
+  .logout-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.6rem 1.5rem;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #ff3e00, #ff8a00);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .logout-btn:hover {
+    opacity: 0.9;
+  }
+
+  /* Login Form Styles */
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .login-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 1.5rem;
+    background: white;
+    padding: 2rem;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .chat-page.dark .login-card {
+    border-color: #374151;
+    background: #1f2937;
+  }
+
+  .login-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .card-subtitle {
+    margin: 0 0 1.5rem 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  .chat-page.dark .card-subtitle {
+    color: #9ca3af;
+  }
+
+  .login-input {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border-radius: 0.75rem;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    outline: none;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
+    background: white;
+    color: #111827;
+    box-sizing: border-box;
+  }
+  .chat-page.dark .login-input {
+    background: #111827;
+    border-color: #4b5563;
+    color: #f3f4f6;
+  }
+  .login-input:focus {
+    border-color: #ff3e00;
+  }
+
+  .login-input-group {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .login-button {
+    padding: 0.9rem 2rem;
+    border-radius: 0.75rem;
+    border: none;
+    background: linear-gradient(135deg, #ff3e00, #ff8a00);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .login-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .login-button:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  /* Chat Styles */
   .chat-shell {
     border: 1px solid #e5e7eb;
     border-radius: 1.5rem;
@@ -180,6 +405,13 @@
     font-size: 1rem;
     white-space: pre-wrap;
     transition: background 0.3s, color 0.3s;
+  }
+  .message-author {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    opacity: 0.7;
   }
   .message.user {
     align-self: flex-end;
@@ -255,6 +487,14 @@
     }
     .message {
       max-width: 85%;
+    }
+    .logout-btn {
+      position: static;
+      margin-top: 1rem;
+      width: 100%;
+    }
+    .login-input-group {
+      flex-direction: column;
     }
   }
 </style>

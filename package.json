@@ -28,6 +28,7 @@
 	},
 	"dependencies": {
 		"@neoconfetti/svelte": "^2.2.2",
-		"svelte-kit": "^1.2.0"
+		"svelte-kit": "^1.2.0",
+		"twilio": "^5.11.2"
 	}
 }
