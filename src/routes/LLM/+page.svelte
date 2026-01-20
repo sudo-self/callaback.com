@@ -50,7 +50,7 @@
     messages = [...messages, { role: 'user', content: userMessage }];
 
     try {
-      const res = await fetch('https://llm.callaback1900.workers.dev', {
+      const res = await fetch('https://llm.callaback.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage })
@@ -77,7 +77,7 @@
 
 <section class="chat-page" class:dark={$theme === 'dark'}>
   <header class="chat-header">
-    <h1><span class="brand-gradient">ai.callaback</span></h1>
+    <h1><span class="brand-gradient">llm.callaback</span></h1>
     <p class="subtitle">Talk to the Callaback assistant</p>
   </header>
 
